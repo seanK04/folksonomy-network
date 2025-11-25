@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENGL1190M Folksonomy Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.1/dist/graphology.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sigma@2.4.0/build/sigma.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        #header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        #controls {
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #search {
+            width: 100%;
+            max-width: 400px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        #search:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+        
+        #container {
+            width: 100vw;
+            height: calc(100vh - 120px);
+            background: white;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .node-label {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            max-width: 250px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .node-label strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+        
+        .node-label .detail {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            #header h1 {
+                font-size: 18px;
+            }
+            #header p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>ENGL1190M Folksonomy Network</h1>
+        <p>Explore connections between course readings and student-generated hashtags</p>
+    </div>
+    
+    <div id="controls">
+        <input 
+            type="text" 
+            id="search" 
+            placeholder="Search for readings or hashtags..."
+            autocomplete="off"
+        />
+    </div>
+    
+    <div id="container">
+        <div id="loading">Loading network data...</div>
+    </div>
+
+    <script>
+        // Configuration
+        const GRAPH_DATA_URL = 'graph.json';
+        
+        // State
+        let graph;
+        let renderer;
+        let hoveredNode = null;
+        
+        // Initialize
+        async function init() {
+            try {
+                // Fetch graph data with cache-busting
+                const response = await fetch(`${GRAPH_DATA_URL}?t=${Date.now()}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load data: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Remove loading message
+                document.getElementById('loading').remove();
+                
+                // Create graph
+                graph = new graphology.Graph();
+                
+                // Add nodes
+                data.nodes.forEach(node => {
+                    graph.addNode(node.id, {
+                        label: node.label,
+                        type: node.type,
+                        size: node.size || 10,
+                        color: node.color,
+                        x: Math.random(),
+                        y: Math.random(),
+                        count: node.count || 0
+                    });
+                });
+                
+                // Add edges
+                data.edges.forEach(edge => {
+                    if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
+                        graph.addEdge(edge.source, edge.target, {
+                            weight: edge.weight || 1,
+                            size: Math.max(1, (edge.weight || 1) * 0.5)
+                        });
+                    }
+                });
+                
+                // Create renderer
+                renderer = new Sigma(graph, document.getElementById('container'), {
+                    renderEdgeLabels: false,
+                    defaultNodeColor: '#999',
+                    defaultEdgeColor: '#ccc',
+                    labelSize: 12,
+                    labelWeight: 'normal',
+                    enableEdgeEvents: true
+                });
+                
+                // Setup interactions
+                setupInteractions();
+                
+                console.log(`Network loaded: ${graph.order} nodes, ${graph.size} edges`);
+                
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    `<span style="color: #e74c3c;">Error loading network data: ${error.message}</span>`;
+                console.error('Initialization error:', error);
+            }
+        }
+        
+        function setupInteractions() {
+            // Hover interactions
+            renderer.on('enterNode', ({ node }) => {
+                hoveredNode = node;
+                
+                // Highlight connected nodes
+                const nodeAttributes = graph.getNodeAttributes(node);
+                const neighbors = new Set(graph.neighbors(node));
+                
+                graph.forEachNode((n, attrs) => {
+                    if (n === node || neighbors.has(n)) {
+                        graph.setNodeAttribute(n, 'highlighted', true);
+                    } else {
+                        graph.setNodeAttribute(n, 'highlighted', false);
+                    }
+                });
+                
+                graph.forEachEdge((edge, attrs, source, target) => {
+                    if (source === node || target === node) {
+                        graph.setEdgeAttribute(edge, 'color', '#333');
+                        graph.setEdgeAttribute(edge, 'size', attrs.size * 1.5);
+                    } else {
+                        graph.setEdgeAttribute(edge, 'color', '#eee');
+                    }
+                });
+                
+                renderer.refresh();
+            });
+            
+            renderer.on('leaveNode', () => {
+                hoveredNode = null;
+                
+                // Reset highlighting
+                graph.forEachNode((n) => {
+                    graph.setNodeAttribute(n, 'highlighted', true);
+                });
+                
+                graph.forEachEdge((edge) => {
+                    graph.setEdgeAttribute(edge, 'color', '#ccc');
+                    const weight = graph.getEdgeAttribute(edge, 'weight') || 1;
+                    graph.setEdgeAttribute(edge, 'size', Math.max(1, weight * 0.5));
+                });
+                
+                renderer.refresh();
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (!query) {
+                    // Show all nodes
+                    graph.forEachNode((node) => {
+                        graph.setNodeAttribute(node, 'hidden', false);
+                    });
+                } else {
+                    // Filter nodes by label
+                    graph.forEachNode((node, attrs) => {
+                        const label = attrs.label.toLowerCase();
+                        graph.setNodeAttribute(node, 'hidden', !label.includes(query));
+                    });
+                }
+                
+                renderer.refresh();
+            });
+            
+            // Reduce node appearance based on highlighting
+            renderer.setSetting('nodeReducer', (node, data) => {
+                const res = { ...data };
+                
+                if (hoveredNode && !data.highlighted) {
+                    res.color = '#ddd';
+                    res.size = data.size * 0.7;
+                }
+                
+                return res;
+            });
+        }
+        
+        // Start
+        init();
+    </script>
+</body>
+</html>
