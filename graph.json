@@ -84,8 +84,8 @@
       "id": "hashtag_agency",
       "label": "#agency",
       "type": "hashtag",
-      "count": 9,
-      "size": 25,
+      "count": 8,
+      "size": 24,
       "color": "#F39C12"
     },
     {
@@ -835,7 +835,7 @@
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_agency",
-      "weight": 2
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
