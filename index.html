@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENGL1190M Folksonomy Network</title>
-    <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.1/dist/graphology.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sigma@2.4.0/build/sigma.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.1/dist/graphology.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sigma@2.4.0/sigma.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphology-layout-forceatlas2@0.10.1/graphology-layout-forceatlas2.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -16,6 +17,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: #f5f5f5;
+            overflow: hidden;
         }
         
         #header {
@@ -23,6 +25,8 @@
             color: white;
             padding: 15px 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
         }
         
         #header h1 {
@@ -40,6 +44,8 @@
             padding: 15px 20px;
             background: white;
             border-bottom: 1px solid #ddd;
+            position: relative;
+            z-index: 10;
         }
         
         #search {
@@ -60,6 +66,7 @@
             width: 100vw;
             height: calc(100vh - 120px);
             background: white;
+            position: relative;
         }
         
         #loading {
@@ -69,28 +76,39 @@
             transform: translate(-50%, -50%);
             font-size: 16px;
             color: #666;
+            z-index: 5;
         }
         
-        .node-label {
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            max-width: 250px;
-            word-wrap: break-word;
+            padding: 15px;
+            border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 13px;
+            z-index: 5;
         }
         
-        .node-label strong {
-            display: block;
-            margin-bottom: 4px;
+        #legend h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
             color: #2c3e50;
         }
         
-        .node-label .detail {
-            color: #666;
-            font-size: 12px;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
         }
         
         @media (max-width: 600px) {
@@ -98,6 +116,11 @@
                 font-size: 18px;
             }
             #header p {
+                font-size: 12px;
+            }
+            #legend {
+                bottom: 10px;
+                right: 10px;
                 font-size: 12px;
             }
         }
@@ -120,6 +143,17 @@
     
     <div id="container">
         <div id="loading">Loading network data...</div>
+        <div id="legend" style="display: none;">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4A90E2;"></div>
+                <span>Readings</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F39C12;"></div>
+                <span>Hashtags</span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -141,21 +175,26 @@
                 }
                 const data = await response.json();
                 
+                console.log('Loaded data:', data);
+                console.log(`${data.nodes.length} nodes, ${data.edges.length} edges`);
+                
                 // Remove loading message
                 document.getElementById('loading').remove();
+                document.getElementById('legend').style.display = 'block';
                 
                 // Create graph
                 graph = new graphology.Graph();
                 
-                // Add nodes
+                // Add nodes with proper coordinate scaling
                 data.nodes.forEach(node => {
+                    // Use larger coordinate space (0-1000 instead of 0-1)
                     graph.addNode(node.id, {
                         label: node.label,
                         type: node.type,
                         size: node.size || 10,
                         color: node.color,
-                        x: Math.random(),
-                        y: Math.random(),
+                        x: Math.random() * 1000,
+                        y: Math.random() * 1000,
                         count: node.count || 0
                     });
                 });
@@ -165,29 +204,40 @@
                     if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
                         graph.addEdge(edge.source, edge.target, {
                             weight: edge.weight || 1,
-                            size: Math.max(1, (edge.weight || 1) * 0.5)
+                            size: Math.max(1, (edge.weight || 1) * 0.5),
+                            color: '#ccc'
                         });
                     }
                 });
                 
-                // Create renderer
+                // Apply ForceAtlas2 layout for better node positioning
+                const forceAtlas2 = window.graphologyLibrary.layoutForceAtlas2;
+                const settings = forceAtlas2.inferSettings(graph);
+                forceAtlas2.assign(graph, {
+                    iterations: 50,
+                    settings: settings
+                });
+                
+                // Create renderer with proper settings
                 renderer = new Sigma(graph, document.getElementById('container'), {
                     renderEdgeLabels: false,
                     defaultNodeColor: '#999',
                     defaultEdgeColor: '#ccc',
-                    labelSize: 12,
-                    labelWeight: 'normal',
-                    enableEdgeEvents: true
+                    labelSize: 14,
+                    labelWeight: '600',
+                    enableEdgeEvents: true,
+                    minCameraRatio: 0.1,
+                    maxCameraRatio: 10
                 });
                 
                 // Setup interactions
                 setupInteractions();
                 
-                console.log(`Network loaded: ${graph.order} nodes, ${graph.size} edges`);
+                console.log(`✓ Network rendered: ${graph.order} nodes, ${graph.size} edges`);
                 
             } catch (error) {
                 document.getElementById('loading').innerHTML = 
-                    `<span style="color: #e74c3c;">Error loading network data: ${error.message}</span>`;
+                    `<span style="color: #e74c3c;">Error loading network: ${error.message}<br><br>Check browser console for details</span>`;
                 console.error('Initialization error:', error);
             }
         }
@@ -197,11 +247,11 @@
             renderer.on('enterNode', ({ node }) => {
                 hoveredNode = node;
                 
-                // Highlight connected nodes
-                const nodeAttributes = graph.getNodeAttributes(node);
+                // Get node neighbors
                 const neighbors = new Set(graph.neighbors(node));
                 
-                graph.forEachNode((n, attrs) => {
+                // Update node appearance
+                graph.forEachNode((n) => {
                     if (n === node || neighbors.has(n)) {
                         graph.setNodeAttribute(n, 'highlighted', true);
                     } else {
@@ -209,6 +259,7 @@
                     }
                 });
                 
+                // Update edge appearance
                 graph.forEachEdge((edge, attrs, source, target) => {
                     if (source === node || target === node) {
                         graph.setEdgeAttribute(edge, 'color', '#333');
@@ -229,9 +280,10 @@
                     graph.setNodeAttribute(n, 'highlighted', true);
                 });
                 
-                graph.forEachEdge((edge) => {
+                // Reset edges
+                graph.forEachEdge((edge, attrs) => {
                     graph.setEdgeAttribute(edge, 'color', '#ccc');
-                    const weight = graph.getEdgeAttribute(edge, 'weight') || 1;
+                    const weight = attrs.weight || 1;
                     graph.setEdgeAttribute(edge, 'size', Math.max(1, weight * 0.5));
                 });
                 
@@ -259,7 +311,7 @@
                 renderer.refresh();
             });
             
-            // Reduce node appearance based on highlighting
+            // Node appearance reducer (for hover effect)
             renderer.setSetting('nodeReducer', (node, data) => {
                 const res = { ...data };
                 
@@ -268,11 +320,15 @@
                     res.size = data.size * 0.7;
                 }
                 
+                if (data.hidden) {
+                    res.hidden = true;
+                }
+                
                 return res;
             });
         }
         
-        // Start
+        // Start initialization
         init();
     </script>
 </body>
