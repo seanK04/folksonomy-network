@@ -221,7 +221,8 @@
                     const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
                     graph.addNode(node.id, {
                         label: node.label,
-                        type: node.type,
+                        // DON'T pass type to graph - let Sigma use defaultNodeType
+                        nodeType: node.type,  // Store for reference but not used by Sigma
                         size: node.size || 10,
                         color: node.color,
                         x: centerX + innerRadius * Math.cos(angle),
@@ -235,7 +236,8 @@
                     const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
                     graph.addNode(node.id, {
                         label: node.label,
-                        type: node.type,
+                        // DON'T pass type to graph - let Sigma use defaultNodeType
+                        nodeType: node.type,  // Store for reference but not used by Sigma
                         size: node.size || 10,
                         color: node.color,
                         x: centerX + outerRadius * Math.cos(angle),
