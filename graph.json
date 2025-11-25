@@ -25,8 +25,8 @@
       "id": "hashtag_agency",
       "label": "#agency",
       "type": "hashtag",
-      "count": 1,
-      "size": 10,
+      "count": 2,
+      "size": 12,
       "color": "#F39C12"
     },
     {
@@ -227,6 +227,11 @@
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_empowerment",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_agency",
       "weight": 1
     },
     {
