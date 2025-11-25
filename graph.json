@@ -1,43 +1,8 @@
 {
   "nodes": [
     {
-      "id": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "label": "Adler-Kassner & Wardle (2015) - \"Naming What We Know\"",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
-      "id": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "label": "Carter (2007) - \"Ways of Knowing Doing and Writing\"",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
       "id": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
       "label": "Diana Paula Dud\u0103u - \"Writing Programs as Sites of Resistance\"",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
-      "id": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "label": "Inoue (2015) - \"Antiracist Writing Assessment\"",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
-      "id": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "label": "Poe et al. (2018) - \"Writing Assessment Ecology\"",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
-      "id": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "label": "Russell (2002) - \"Writing in the Academic Disciplines\"",
       "type": "reading",
       "size": 15,
       "color": "#4A90E2"
@@ -57,280 +22,48 @@
       "color": "#4A90E2"
     },
     {
-      "id": "hashtag_activity-systems",
-      "label": "#activity-systems",
+      "id": "hashtag_agency",
+      "label": "#agency",
       "type": "hashtag",
       "count": 2,
       "size": 12,
       "color": "#F39C12"
     },
     {
-      "id": "hashtag_activity-theory",
-      "label": "#activity-theory",
-      "type": "hashtag",
-      "count": 7,
-      "size": 22,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_adler-kassner",
-      "label": "#adler-kassner",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_agency",
-      "label": "#agency",
-      "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_antiracist-pedagogy",
-      "label": "#antiracist-pedagogy",
-      "type": "hashtag",
-      "count": 8,
-      "size": 24,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_assessment",
-      "label": "#assessment",
-      "type": "hashtag",
-      "count": 11,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_assessment-ecology",
-      "label": "#assessment-ecology",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_carter",
-      "label": "#carter",
-      "type": "hashtag",
-      "count": 5,
-      "size": 18,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_change",
-      "label": "#change",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
       "id": "hashtag_communication",
       "label": "#communication",
       "type": "hashtag",
-      "count": 6,
-      "size": 20,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_composition",
-      "label": "#composition",
-      "type": "hashtag",
-      "count": 5,
-      "size": 18,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_context",
-      "label": "#context",
-      "type": "hashtag",
-      "count": 6,
-      "size": 20,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_context-driven",
-      "label": "#context-driven",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_cool-media",
-      "label": "#cool-media",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_critical-pedagogy",
-      "label": "#critical-pedagogy",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_critical-thinking",
       "label": "#critical-thinking",
       "type": "hashtag",
-      "count": 5,
-      "size": 18,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_cultural-impact",
-      "label": "#cultural-impact",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_determinism",
-      "label": "#determinism",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_disciplinarity",
-      "label": "#disciplinarity",
-      "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_disciplinary-conventions",
-      "label": "#disciplinary-conventions",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_ecological-approach",
-      "label": "#ecological-approach",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_ecology",
-      "label": "#ecology",
-      "type": "hashtag",
-      "count": 5,
-      "size": 18,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_education",
       "label": "#education",
       "type": "hashtag",
-      "count": 7,
-      "size": 22,
+      "count": 1,
+      "size": 10,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_empowerment",
       "label": "#empowerment",
       "type": "hashtag",
-      "count": 3,
-      "size": 14,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_engaged-learning",
-      "label": "#engaged-learning",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_engagement",
-      "label": "#engagement",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_epistemology",
-      "label": "#epistemology",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_equity",
-      "label": "#equity",
-      "type": "hashtag",
-      "count": 6,
-      "size": 20,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_feminism",
       "label": "#feminism",
-      "type": "hashtag",
-      "count": 10,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_feminist-approaches",
-      "label": "#feminist-approaches",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_feminist-theory",
-      "label": "#feminist-theory",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_genre",
-      "label": "#genre",
-      "type": "hashtag",
-      "count": 11,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_genre-awareness",
-      "label": "#genre-awareness",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_genre-theory",
-      "label": "#genre-theory",
-      "type": "hashtag",
-      "count": 3,
-      "size": 14,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_grading",
-      "label": "#grading",
       "type": "hashtag",
       "count": 1,
       "size": 10,
@@ -340,101 +73,21 @@
       "id": "hashtag_hooks",
       "label": "#hooks",
       "type": "hashtag",
-      "count": 8,
-      "size": 24,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_hot-cool-media",
-      "label": "#hot-cool-media",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_hot-media",
-      "label": "#hot-media",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_inoue",
-      "label": "#inoue",
-      "type": "hashtag",
-      "count": 6,
-      "size": 20,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_institutional-change",
       "label": "#institutional-change",
       "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_institutional-context",
-      "label": "#institutional-context",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_institutional-critique",
-      "label": "#institutional-critique",
-      "type": "hashtag",
-      "count": 3,
-      "size": 14,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_knowledge-making",
-      "label": "#knowledge-making",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_labor",
-      "label": "#labor",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_labor-based-grading",
-      "label": "#labor-based-grading",
-      "type": "hashtag",
-      "count": 6,
-      "size": 20,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_liberation",
       "label": "#liberation",
-      "type": "hashtag",
-      "count": 7,
-      "size": 22,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_local-assessment",
-      "label": "#local-assessment",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_local-context",
-      "label": "#local-context",
       "type": "hashtag",
       "count": 1,
       "size": 10,
@@ -444,280 +97,64 @@
       "id": "hashtag_mcluhan",
       "label": "#mcluhan",
       "type": "hashtag",
-      "count": 8,
-      "size": 24,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_media",
-      "label": "#media",
-      "type": "hashtag",
-      "count": 3,
-      "size": 14,
+      "count": 1,
+      "size": 10,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_media-theory",
       "label": "#media-theory",
       "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_metacognition",
-      "label": "#metacognition",
-      "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_metagenre",
-      "label": "#metagenre",
-      "type": "hashtag",
-      "count": 8,
-      "size": 24,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_naming",
-      "label": "#naming",
-      "type": "hashtag",
-      "count": 7,
-      "size": 22,
+      "count": 2,
+      "size": 12,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_pedagogy",
       "label": "#pedagogy",
       "type": "hashtag",
-      "count": 8,
-      "size": 24,
+      "count": 1,
+      "size": 10,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_perception",
       "label": "#perception",
       "type": "hashtag",
-      "count": 5,
-      "size": 18,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_poe",
-      "label": "#poe",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
+      "count": 1,
+      "size": 10,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_power",
       "label": "#power",
       "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_racism",
-      "label": "#racism",
-      "type": "hashtag",
-      "count": 5,
-      "size": 18,
+      "count": 2,
+      "size": 12,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_resistance",
       "label": "#resistance",
       "type": "hashtag",
-      "count": 8,
-      "size": 24,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_russell",
-      "label": "#russell",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_sensory-extension",
-      "label": "#sensory-extension",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_social-justice",
-      "label": "#social-justice",
-      "type": "hashtag",
-      "count": 5,
-      "size": 18,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_society",
-      "label": "#society",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_systems",
-      "label": "#systems",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_systems-thinking",
-      "label": "#systems-thinking",
-      "type": "hashtag",
-      "count": 3,
-      "size": 14,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_technology",
       "label": "#technology",
       "type": "hashtag",
-      "count": 10,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_threshold-concepts",
-      "label": "#threshold-concepts",
-      "type": "hashtag",
-      "count": 9,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_transfer",
-      "label": "#transfer",
-      "type": "hashtag",
-      "count": 11,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_transgression",
-      "label": "#transgression",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_validity",
-      "label": "#validity",
-      "type": "hashtag",
-      "count": 8,
-      "size": 24,
       "color": "#F39C12"
     },
     {
       "id": "hashtag_wac",
       "label": "#wac",
       "type": "hashtag",
-      "count": 11,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_wardle",
-      "label": "#wardle",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_ways-of-knowing",
-      "label": "#ways-of-knowing",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_wpa",
-      "label": "#wpa",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing",
-      "label": "#writing",
-      "type": "hashtag",
-      "count": 12,
-      "size": 25,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-about-writing",
-      "label": "#writing-about-writing",
-      "type": "hashtag",
       "count": 1,
       "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-across-curriculum",
-      "label": "#writing-across-curriculum",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-assessment",
-      "label": "#writing-assessment",
-      "type": "hashtag",
-      "count": 4,
-      "size": 16,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-conventions",
-      "label": "#writing-conventions",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-knowledge",
-      "label": "#writing-knowledge",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-programs",
-      "label": "#writing-programs",
-      "type": "hashtag",
-      "count": 2,
-      "size": 12,
-      "color": "#F39C12"
-    },
-    {
-      "id": "hashtag_writing-studies",
-      "label": "#writing-studies",
-      "type": "hashtag",
-      "count": 9,
-      "size": 25,
       "color": "#F39C12"
     }
   ],
@@ -725,516 +162,96 @@
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_media-theory",
-      "weight": 9
+      "weight": 2
     },
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_technology",
-      "weight": 10
+      "weight": 1
     },
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_perception",
-      "weight": 5
+      "weight": 1
     },
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_power",
-      "weight": 2
+      "weight": 1
     },
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_mcluhan",
-      "weight": 8
+      "weight": 1
     },
     {
       "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
       "target": "hashtag_communication",
-      "weight": 6
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_determinism",
       "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_society",
-      "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_media",
-      "weight": 3
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_sensory-extension",
-      "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_hot-media",
-      "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_cool-media",
-      "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_cultural-impact",
-      "weight": 1
-    },
-    {
-      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
-      "target": "hashtag_hot-cool-media",
-      "weight": 2
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_feminism",
-      "weight": 8
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_pedagogy",
-      "weight": 6
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_critical-thinking",
-      "weight": 5
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_power",
-      "weight": 5
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_education",
-      "weight": 7
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_liberation",
-      "weight": 7
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_hooks",
-      "weight": 8
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_empowerment",
-      "weight": 3
+      "weight": 1
     },
     {
       "source": "reading_bell_hooks_-_teaching_to_transgress",
       "target": "hashtag_agency",
-      "weight": 2
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_critical-pedagogy",
-      "weight": 4
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_engaged-learning",
-      "weight": 1
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_resistance",
-      "weight": 1
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_transgression",
-      "weight": 1
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_feminist-theory",
-      "weight": 1
-    },
-    {
-      "source": "reading_bell_hooks_-_teaching_to_transgress",
-      "target": "hashtag_engagement",
       "weight": 1
     },
     {
       "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
       "target": "hashtag_resistance",
-      "weight": 7
+      "weight": 1
     },
     {
       "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
       "target": "hashtag_wac",
-      "weight": 2
+      "weight": 1
     },
     {
       "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
       "target": "hashtag_institutional-change",
-      "weight": 4
+      "weight": 1
     },
     {
       "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
       "target": "hashtag_agency",
-      "weight": 7
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_institutional-critique",
-      "weight": 3
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_power",
-      "weight": 2
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_writing-programs",
-      "weight": 2
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_change",
-      "weight": 1
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_wpa",
-      "weight": 4
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_feminist-approaches",
-      "weight": 1
-    },
-    {
-      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
-      "target": "hashtag_feminism",
-      "weight": 2
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_wac",
-      "weight": 9
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_disciplinarity",
-      "weight": 6
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_writing-across-curriculum",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_pedagogy",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_activity-theory",
-      "weight": 7
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_genre",
-      "weight": 6
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_institutional-context",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_transfer",
-      "weight": 3
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_writing",
-      "weight": 4
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_disciplinary-conventions",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_genre-theory",
-      "weight": 3
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_writing-studies",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_activity-systems",
-      "weight": 2
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_writing-conventions",
-      "weight": 1
-    },
-    {
-      "source": "reading_russell_2002_-_writing_in_the_academic_disciplines",
-      "target": "hashtag_russell",
-      "weight": 2
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_epistemology",
-      "weight": 1
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_disciplinarity",
-      "weight": 2
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_writing",
-      "weight": 7
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_ways-of-knowing",
-      "weight": 2
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_metagenre",
-      "weight": 8
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_genre",
-      "weight": 5
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_writing-studies",
-      "weight": 1
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_transfer",
-      "weight": 7
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_metacognition",
-      "weight": 7
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_genre-awareness",
-      "weight": 4
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_carter",
-      "weight": 5
-    },
-    {
-      "source": "reading_carter_2007_-_ways_of_knowing_doing_and_writing",
-      "target": "hashtag_knowledge-making",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_threshold-concepts",
-      "weight": 9
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_writing-studies",
-      "weight": 7
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_epistemology",
-      "weight": 3
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_metacognition",
-      "weight": 2
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_naming",
-      "weight": 7
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_writing-knowledge",
-      "weight": 2
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_composition",
-      "weight": 5
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_disciplinarity",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_transfer",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_pedagogy",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_writing-about-writing",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_adler-kassner",
-      "weight": 1
-    },
-    {
-      "source": "reading_adler-kassner_wardle_2015_-_naming_what_we_know",
-      "target": "hashtag_wardle",
-      "weight": 2
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_antiracist-pedagogy",
-      "weight": 8
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_assessment",
-      "weight": 7
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_labor-based-grading",
-      "weight": 6
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_inoue",
-      "weight": 6
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_racism",
-      "weight": 5
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_writing",
-      "weight": 1
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_social-justice",
-      "weight": 5
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_equity",
-      "weight": 6
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_grading",
-      "weight": 1
-    },
-    {
-      "source": "reading_inoue_2015_-_antiracist_writing_assessment",
-      "target": "hashtag_labor",
-      "weight": 2
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_assessment-ecology",
-      "weight": 4
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_validity",
-      "weight": 8
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_context",
-      "weight": 6
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_writing-assessment",
-      "weight": 4
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_ecology",
-      "weight": 5
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_assessment",
-      "weight": 4
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_systems-thinking",
-      "weight": 3
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_ecological-approach",
-      "weight": 1
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_poe",
-      "weight": 4
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_local-context",
-      "weight": 1
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_context-driven",
-      "weight": 1
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_local-assessment",
-      "weight": 2
-    },
-    {
-      "source": "reading_poe_et_al_2018_-_writing_assessment_ecology",
-      "target": "hashtag_systems",
       "weight": 1
     }
   ]
