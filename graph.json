@@ -1,4 +1,253 @@
 {
-  "nodes": [],
-  "edges": []
+  "nodes": [
+    {
+      "id": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
+      "label": "Diana Paula Dud\u0103u - \"Writing Programs as Sites of Resistance\"",
+      "type": "reading",
+      "size": 15,
+      "color": "#4A90E2"
+    },
+    {
+      "id": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "label": "The Medium is the Message - Marshall McLuhan",
+      "type": "reading",
+      "size": 15,
+      "color": "#4A90E2"
+    },
+    {
+      "id": "reading_bell_hooks_-_teaching_to_transgress",
+      "label": "bell hooks - \"Teaching to Transgress\"",
+      "type": "reading",
+      "size": 15,
+      "color": "#4A90E2"
+    },
+    {
+      "id": "hashtag_agency",
+      "label": "#agency",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_communication",
+      "label": "#communication",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_critical-thinking",
+      "label": "#critical-thinking",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_education",
+      "label": "#education",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_empowerment",
+      "label": "#empowerment",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_feminism",
+      "label": "#feminism",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_hooks",
+      "label": "#hooks",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_institutional-change",
+      "label": "#institutional-change",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_liberation",
+      "label": "#liberation",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_mcluhan",
+      "label": "#mcluhan",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_media-theory",
+      "label": "#media-theory",
+      "type": "hashtag",
+      "count": 2,
+      "size": 12,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_pedagogy",
+      "label": "#pedagogy",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_perception",
+      "label": "#perception",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_power",
+      "label": "#power",
+      "type": "hashtag",
+      "count": 2,
+      "size": 12,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_resistance",
+      "label": "#resistance",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_technology",
+      "label": "#technology",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    },
+    {
+      "id": "hashtag_wac",
+      "label": "#wac",
+      "type": "hashtag",
+      "count": 1,
+      "size": 10,
+      "color": "#F39C12"
+    }
+  ],
+  "edges": [
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_media-theory",
+      "weight": 2
+    },
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_technology",
+      "weight": 1
+    },
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_perception",
+      "weight": 1
+    },
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_power",
+      "weight": 1
+    },
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_mcluhan",
+      "weight": 1
+    },
+    {
+      "source": "reading_the_medium_is_the_message_-_marshall_mcluhan",
+      "target": "hashtag_communication",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_feminism",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_pedagogy",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_critical-thinking",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_power",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_education",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_liberation",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_hooks",
+      "weight": 1
+    },
+    {
+      "source": "reading_bell_hooks_-_teaching_to_transgress",
+      "target": "hashtag_empowerment",
+      "weight": 1
+    },
+    {
+      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
+      "target": "hashtag_resistance",
+      "weight": 1
+    },
+    {
+      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
+      "target": "hashtag_wac",
+      "weight": 1
+    },
+    {
+      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
+      "target": "hashtag_institutional-change",
+      "weight": 1
+    },
+    {
+      "source": "reading_diana_paula_dud\u0103u_-_writing_programs_as_sites_of_resistance",
+      "target": "hashtag_agency",
+      "weight": 1
+    }
+  ]
 }
