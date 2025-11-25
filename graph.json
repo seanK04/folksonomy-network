@@ -1,39 +1,4 @@
 {
-  "nodes": [
-    {
-      "id": "reading_sample",
-      "label": "Sample Reading",
-      "type": "reading",
-      "size": 15,
-      "color": "#4A90E2"
-    },
-    {
-      "id": "power",
-      "label": "#power",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    },
-    {
-      "id": "agency",
-      "label": "#agency",
-      "type": "hashtag",
-      "count": 1,
-      "size": 10,
-      "color": "#F39C12"
-    }
-  ],
-  "edges": [
-    {
-      "source": "reading_sample",
-      "target": "power",
-      "weight": 1
-    },
-    {
-      "source": "reading_sample",
-      "target": "agency",
-      "weight": 1
-    }
-  ]
+  "nodes": [],
+  "edges": []
 }
