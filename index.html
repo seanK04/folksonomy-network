@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENGL1190M Folksonomy Network</title>
-    <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.1/dist/graphology.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sigma@2.4.0/sigma.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/graphology-layout-forceatlas2@0.10.1/graphology-layout-forceatlas2.umd.min.js"></script>
+    <script src="https://unpkg.com/graphology@0.25.4/dist/graphology.umd.min.js"></script>
+    <script src="https://unpkg.com/sigma@3.0.0-beta.29/build/sigma.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -77,6 +76,7 @@
             font-size: 16px;
             color: #666;
             z-index: 5;
+            text-align: center;
         }
         
         #legend {
@@ -157,6 +157,8 @@
     </div>
 
     <script>
+        console.log('Script starting...');
+        
         // Configuration
         const GRAPH_DATA_URL = 'graph.json';
         
@@ -165,41 +167,70 @@
         let renderer;
         let hoveredNode = null;
         
+        // Simple circular layout function
+        function circularLayout(graph) {
+            const nodes = graph.nodes();
+            const numNodes = nodes.length;
+            const radius = 300;
+            const centerX = 500;
+            const centerY = 400;
+            
+            nodes.forEach((node, i) => {
+                const angle = (2 * Math.PI * i) / numNodes;
+                graph.setNodeAttribute(node, 'x', centerX + radius * Math.cos(angle));
+                graph.setNodeAttribute(node, 'y', centerY + radius * Math.sin(angle));
+            });
+        }
+        
         // Initialize
         async function init() {
+            console.log('Init function called');
+            
             try {
                 // Fetch graph data with cache-busting
+                console.log('Fetching graph.json...');
                 const response = await fetch(`${GRAPH_DATA_URL}?t=${Date.now()}`);
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`Failed to load data: ${response.status}`);
                 }
-                const data = await response.json();
                 
-                console.log('Loaded data:', data);
+                const data = await response.json();
+                console.log('Data loaded:', data);
                 console.log(`${data.nodes.length} nodes, ${data.edges.length} edges`);
                 
                 // Remove loading message
-                document.getElementById('loading').remove();
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.remove();
+                }
                 document.getElementById('legend').style.display = 'block';
+                
+                // Check if graphology is available
+                if (typeof graphology === 'undefined') {
+                    throw new Error('Graphology library not loaded');
+                }
+                
+                console.log('Creating graph...');
                 
                 // Create graph
                 graph = new graphology.Graph();
                 
-                // Add nodes with proper coordinate scaling
+                // Add nodes
+                console.log('Adding nodes...');
                 data.nodes.forEach(node => {
-                    // Use larger coordinate space (0-1000 instead of 0-1)
                     graph.addNode(node.id, {
                         label: node.label,
                         type: node.type,
                         size: node.size || 10,
                         color: node.color,
-                        x: Math.random() * 1000,
-                        y: Math.random() * 1000,
                         count: node.count || 0
                     });
                 });
                 
                 // Add edges
+                console.log('Adding edges...');
                 data.edges.forEach(edge => {
                     if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
                         graph.addEdge(edge.source, edge.target, {
@@ -210,25 +241,28 @@
                     }
                 });
                 
-                // Apply ForceAtlas2 layout for better node positioning
-                const forceAtlas2 = window.graphologyLibrary.layoutForceAtlas2;
-                const settings = forceAtlas2.inferSettings(graph);
-                forceAtlas2.assign(graph, {
-                    iterations: 50,
-                    settings: settings
-                });
+                // Apply circular layout
+                console.log('Applying layout...');
+                circularLayout(graph);
                 
-                // Create renderer with proper settings
-                renderer = new Sigma(graph, document.getElementById('container'), {
+                // Check if Sigma is available
+                if (typeof Sigma === 'undefined') {
+                    throw new Error('Sigma library not loaded');
+                }
+                
+                console.log('Creating Sigma renderer...');
+                
+                // Create renderer
+                const container = document.getElementById('container');
+                renderer = new Sigma(graph, container, {
                     renderEdgeLabels: false,
-                    defaultNodeColor: '#999',
-                    defaultEdgeColor: '#ccc',
                     labelSize: 14,
                     labelWeight: '600',
-                    enableEdgeEvents: true,
                     minCameraRatio: 0.1,
                     maxCameraRatio: 10
                 });
+                
+                console.log('Renderer created successfully');
                 
                 // Setup interactions
                 setupInteractions();
@@ -236,34 +270,32 @@
                 console.log(`✓ Network rendered: ${graph.order} nodes, ${graph.size} edges`);
                 
             } catch (error) {
-                document.getElementById('loading').innerHTML = 
-                    `<span style="color: #e74c3c;">Error loading network: ${error.message}<br><br>Check browser console for details</span>`;
-                console.error('Initialization error:', error);
+                console.error('ERROR in init():', error);
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.innerHTML = 
+                        `<span style="color: #e74c3c;">Error loading network: ${error.message}<br><br>` +
+                        `Check browser console (F12) for details</span>`;
+                }
             }
         }
         
         function setupInteractions() {
+            console.log('Setting up interactions...');
+            
             // Hover interactions
             renderer.on('enterNode', ({ node }) => {
                 hoveredNode = node;
-                
-                // Get node neighbors
                 const neighbors = new Set(graph.neighbors(node));
                 
-                // Update node appearance
                 graph.forEachNode((n) => {
-                    if (n === node || neighbors.has(n)) {
-                        graph.setNodeAttribute(n, 'highlighted', true);
-                    } else {
-                        graph.setNodeAttribute(n, 'highlighted', false);
-                    }
+                    graph.setNodeAttribute(n, 'highlighted', n === node || neighbors.has(n));
                 });
                 
-                // Update edge appearance
                 graph.forEachEdge((edge, attrs, source, target) => {
                     if (source === node || target === node) {
                         graph.setEdgeAttribute(edge, 'color', '#333');
-                        graph.setEdgeAttribute(edge, 'size', attrs.size * 1.5);
+                        graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 0.75);
                     } else {
                         graph.setEdgeAttribute(edge, 'color', '#eee');
                     }
@@ -275,16 +307,13 @@
             renderer.on('leaveNode', () => {
                 hoveredNode = null;
                 
-                // Reset highlighting
                 graph.forEachNode((n) => {
                     graph.setNodeAttribute(n, 'highlighted', true);
                 });
                 
-                // Reset edges
                 graph.forEachEdge((edge, attrs) => {
                     graph.setEdgeAttribute(edge, 'color', '#ccc');
-                    const weight = attrs.weight || 1;
-                    graph.setEdgeAttribute(edge, 'size', Math.max(1, weight * 0.5));
+                    graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
                 });
                 
                 renderer.refresh();
@@ -295,23 +324,19 @@
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 
-                if (!query) {
-                    // Show all nodes
-                    graph.forEachNode((node) => {
+                graph.forEachNode((node, attrs) => {
+                    if (!query) {
                         graph.setNodeAttribute(node, 'hidden', false);
-                    });
-                } else {
-                    // Filter nodes by label
-                    graph.forEachNode((node, attrs) => {
+                    } else {
                         const label = attrs.label.toLowerCase();
                         graph.setNodeAttribute(node, 'hidden', !label.includes(query));
-                    });
-                }
+                    }
+                });
                 
                 renderer.refresh();
             });
             
-            // Node appearance reducer (for hover effect)
+            // Node appearance reducer
             renderer.setSetting('nodeReducer', (node, data) => {
                 const res = { ...data };
                 
@@ -326,10 +351,17 @@
                 
                 return res;
             });
+            
+            console.log('Interactions setup complete');
         }
         
-        // Start initialization
-        init();
+        // Start when page loads
+        console.log('Waiting for DOM to load...');
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
