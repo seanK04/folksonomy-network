@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENGL1190M Folksonomy Network</title>
-    
-    <!-- Load Graphology from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.1/graphology.umd.min.js"></script>
-    
-    <!-- Load Sigma.js v2 from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -82,6 +75,7 @@
             color: #666;
             z-index: 5;
             text-align: center;
+            max-width: 80%;
         }
         
         #legend {
@@ -147,7 +141,12 @@
     </div>
     
     <div id="container">
-        <div id="loading">Loading network data...</div>
+        <div id="loading">
+            Loading libraries...<br>
+            <small style="color: #999; margin-top: 10px; display: block;">
+                If this takes more than 5 seconds, check that your network allows access to cdn.jsdelivr.net
+            </small>
+        </div>
         <div id="legend" style="display: none;">
             <h3>Legend</h3>
             <div class="legend-item">
@@ -162,75 +161,84 @@
     </div>
 
     <script>
-        console.log('=== Script starting ===');
-        console.log('Graphology available?', typeof graphology !== 'undefined');
-        console.log('Sigma available?', typeof Sigma !== 'undefined');
+        console.log('=== Starting library loading ===');
         
-        // Configuration
-        const GRAPH_DATA_URL = 'graph.json';
-        
-        // State
-        let graph;
-        let renderer;
-        let hoveredNode = null;
-        
-        // Simple circular layout function
-        function circularLayout(graph) {
-            const nodes = graph.nodes();
-            const numNodes = nodes.length;
-            
-            // Separate readings and hashtags for better layout
-            const readingNodes = [];
-            const hashtagNodes = [];
-            
-            nodes.forEach(node => {
-                const attrs = graph.getNodeAttributes(node);
-                if (attrs.type === 'reading') {
-                    readingNodes.push(node);
-                } else {
-                    hashtagNodes.push(node);
-                }
-            });
-            
-            const centerX = 500;
-            const centerY = 400;
-            const readingRadius = 150;
-            const hashtagRadius = 350;
-            
-            // Position reading nodes in inner circle
-            readingNodes.forEach((node, i) => {
-                const angle = (2 * Math.PI * i) / readingNodes.length;
-                graph.setNodeAttribute(node, 'x', centerX + readingRadius * Math.cos(angle));
-                graph.setNodeAttribute(node, 'y', centerY + readingRadius * Math.sin(angle));
-            });
-            
-            // Position hashtag nodes in outer circle
-            hashtagNodes.forEach((node, i) => {
-                const angle = (2 * Math.PI * i) / hashtagNodes.length;
-                graph.setNodeAttribute(node, 'x', centerX + hashtagRadius * Math.cos(angle));
-                graph.setNodeAttribute(node, 'y', centerY + hashtagRadius * Math.sin(angle));
+        // Dynamically load scripts to better control errors
+        function loadScript(url) {
+            return new Promise((resolve, reject) => {
+                console.log(`Loading: ${url}`);
+                const script = document.createElement('script');
+                script.src = url;
+                script.onload = () => {
+                    console.log(`✓ Loaded: ${url}`);
+                    resolve();
+                };
+                script.onerror = (e) => {
+                    console.error(`✗ Failed to load: ${url}`, e);
+                    reject(new Error(`Failed to load ${url}`));
+                };
+                document.head.appendChild(script);
             });
         }
         
-        // Initialize
+        // Try multiple CDN sources as fallback
+        async function loadLibraries() {
+            const cdnSources = [
+                {
+                    name: 'jsDelivr',
+                    graphology: 'https://cdn.jsdelivr.net/npm/graphology@0.25.1/dist/graphology.umd.min.js',
+                    sigma: 'https://cdn.jsdelivr.net/npm/sigma@2.4.0/sigma.min.js'
+                },
+                {
+                    name: 'unpkg',
+                    graphology: 'https://unpkg.com/graphology@0.25.1/dist/graphology.umd.min.js',
+                    sigma: 'https://unpkg.com/sigma@2.4.0/sigma.min.js'
+                },
+                {
+                    name: 'cdnjs',
+                    graphology: 'https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.1/graphology.umd.min.js',
+                    sigma: 'https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js'
+                }
+            ];
+            
+            for (let cdn of cdnSources) {
+                try {
+                    console.log(`Trying CDN: ${cdn.name}`);
+                    await loadScript(cdn.graphology);
+                    await loadScript(cdn.sigma);
+                    console.log(`✓ Successfully loaded from ${cdn.name}`);
+                    return true;
+                } catch (error) {
+                    console.warn(`${cdn.name} failed, trying next...`);
+                }
+            }
+            
+            throw new Error('All CDN sources failed. Your network may be blocking external scripts.');
+        }
+        
+        // Main initialization
         async function init() {
-            console.log('=== Init function called ===');
+            console.log('=== Init starting ===');
             
             try {
+                // Load libraries
+                document.getElementById('loading').innerHTML = 'Loading libraries...';
+                await loadLibraries();
+                
                 // Verify libraries loaded
                 if (typeof graphology === 'undefined') {
-                    throw new Error('Graphology library failed to load from CDN');
+                    throw new Error('Graphology library not available after loading');
                 }
                 if (typeof Sigma === 'undefined') {
-                    throw new Error('Sigma library failed to load from CDN');
+                    throw new Error('Sigma library not available after loading');
                 }
                 
-                console.log('✓ Libraries loaded successfully');
+                console.log('✓ Libraries verified');
                 
-                // Fetch graph data with cache-busting
+                // Load data
+                document.getElementById('loading').innerHTML = 'Loading network data...';
                 console.log('Fetching graph.json...');
-                const response = await fetch(`${GRAPH_DATA_URL}?t=${Date.now()}`);
-                console.log('Response status:', response.status);
+                const response = await fetch(`graph.json?t=${Date.now()}`);
                 
                 if (!response.ok) {
                     throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
@@ -240,76 +248,67 @@
                 console.log('✓ Data loaded:', data);
                 console.log(`  ${data.nodes.length} nodes, ${data.edges.length} edges`);
                 
-                // Validate data structure
-                if (!data.nodes || !Array.isArray(data.nodes)) {
-                    throw new Error('Invalid data: nodes array missing');
-                }
-                if (!data.edges || !Array.isArray(data.edges)) {
-                    throw new Error('Invalid data: edges array missing');
-                }
-                
-                // Remove loading message
-                const loadingEl = document.getElementById('loading');
-                if (loadingEl) {
-                    loadingEl.remove();
-                }
+                // Remove loading, show legend
+                document.getElementById('loading').remove();
                 document.getElementById('legend').style.display = 'block';
                 
-                console.log('Creating graph...');
-                
                 // Create graph
-                graph = new graphology.Graph();
+                console.log('Creating graph...');
+                const graph = new graphology.Graph();
                 
-                // Add nodes
-                console.log('Adding nodes...');
-                data.nodes.forEach((node, idx) => {
-                    if (!node.id) {
-                        console.warn('Node missing id:', node);
-                        return;
-                    }
-                    
+                // Add nodes with circular layout
+                const readingNodes = data.nodes.filter(n => n.type === 'reading');
+                const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
+                
+                const centerX = 500;
+                const centerY = 400;
+                const innerRadius = 150;
+                const outerRadius = 350;
+                
+                // Add reading nodes (inner circle)
+                readingNodes.forEach((node, i) => {
+                    const angle = (2 * Math.PI * i) / readingNodes.length;
                     graph.addNode(node.id, {
-                        label: node.label || node.id,
-                        type: node.type || 'unknown',
+                        label: node.label,
+                        type: node.type,
                         size: node.size || 10,
-                        color: node.color || '#999',
+                        color: node.color,
+                        x: centerX + innerRadius * Math.cos(angle),
+                        y: centerY + innerRadius * Math.sin(angle),
                         count: node.count || 0
                     });
                 });
-                console.log(`✓ Added ${graph.order} nodes`);
+                
+                // Add hashtag nodes (outer circle)
+                hashtagNodes.forEach((node, i) => {
+                    const angle = (2 * Math.PI * i) / hashtagNodes.length;
+                    graph.addNode(node.id, {
+                        label: node.label,
+                        type: node.type,
+                        size: node.size || 10,
+                        color: node.color,
+                        x: centerX + outerRadius * Math.cos(angle),
+                        y: centerY + outerRadius * Math.sin(angle),
+                        count: node.count || 0
+                    });
+                });
                 
                 // Add edges
-                console.log('Adding edges...');
-                let edgesAdded = 0;
                 data.edges.forEach(edge => {
-                    if (!edge.source || !edge.target) {
-                        console.warn('Edge missing source/target:', edge);
-                        return;
-                    }
-                    
                     if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
                         graph.addEdge(edge.source, edge.target, {
                             weight: edge.weight || 1,
                             size: Math.max(1, (edge.weight || 1) * 0.5),
                             color: '#ccc'
                         });
-                        edgesAdded++;
-                    } else {
-                        console.warn('Edge references missing nodes:', edge);
                     }
                 });
-                console.log(`✓ Added ${edgesAdded} edges`);
                 
-                // Apply layout
-                console.log('Applying circular layout...');
-                circularLayout(graph);
-                console.log('✓ Layout applied');
-                
-                console.log('Creating Sigma renderer...');
+                console.log(`✓ Graph created: ${graph.order} nodes, ${graph.size} edges`);
                 
                 // Create renderer
-                const container = document.getElementById('container');
-                renderer = new Sigma(graph, container, {
+                console.log('Creating renderer...');
+                const renderer = new Sigma(graph, document.getElementById('container'), {
                     renderEdgeLabels: false,
                     labelSize: 14,
                     labelWeight: '600',
@@ -317,108 +316,100 @@
                     maxCameraRatio: 10
                 });
                 
-                console.log('✓ Renderer created successfully');
+                console.log('✓ Renderer created');
                 
                 // Setup interactions
-                setupInteractions();
+                let hoveredNode = null;
                 
-                console.log(`=== SUCCESS: Network rendered with ${graph.order} nodes, ${graph.size} edges ===`);
+                renderer.on('enterNode', ({ node }) => {
+                    hoveredNode = node;
+                    const neighbors = new Set(graph.neighbors(node));
+                    
+                    graph.forEachNode((n) => {
+                        graph.setNodeAttribute(n, 'highlighted', n === node || neighbors.has(n));
+                    });
+                    
+                    graph.forEachEdge((edge, attrs, source, target) => {
+                        if (source === node || target === node) {
+                            graph.setEdgeAttribute(edge, 'color', '#333');
+                            graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 0.75);
+                        } else {
+                            graph.setEdgeAttribute(edge, 'color', '#eee');
+                        }
+                    });
+                    
+                    renderer.refresh();
+                });
+                
+                renderer.on('leaveNode', () => {
+                    hoveredNode = null;
+                    
+                    graph.forEachNode((n) => {
+                        graph.setNodeAttribute(n, 'highlighted', true);
+                    });
+                    
+                    graph.forEachEdge((edge, attrs) => {
+                        graph.setEdgeAttribute(edge, 'color', '#ccc');
+                        graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
+                    });
+                    
+                    renderer.refresh();
+                });
+                
+                // Search
+                document.getElementById('search').addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase().trim();
+                    
+                    graph.forEachNode((node, attrs) => {
+                        if (!query) {
+                            graph.setNodeAttribute(node, 'hidden', false);
+                        } else {
+                            const label = attrs.label.toLowerCase();
+                            graph.setNodeAttribute(node, 'hidden', !label.includes(query));
+                        }
+                    });
+                    
+                    renderer.refresh();
+                });
+                
+                renderer.setSetting('nodeReducer', (node, data) => {
+                    const res = { ...data };
+                    
+                    if (hoveredNode && !data.highlighted) {
+                        res.color = '#ddd';
+                        res.size = data.size * 0.7;
+                    }
+                    
+                    if (data.hidden) {
+                        res.hidden = true;
+                    }
+                    
+                    return res;
+                });
+                
+                console.log('=== SUCCESS: Visualization complete ===');
                 
             } catch (error) {
-                console.error('=== ERROR in init() ===');
-                console.error('Error type:', error.name);
-                console.error('Error message:', error.message);
-                console.error('Full error:', error);
+                console.error('=== ERROR ===');
+                console.error('Error:', error);
                 
                 const loadingEl = document.getElementById('loading');
                 if (loadingEl) {
                     loadingEl.innerHTML = 
                         `<span style="color: #e74c3c;">
-                            <strong>Error loading network:</strong><br>
+                            <strong>Error loading visualization:</strong><br>
                             ${error.message}<br><br>
-                            <small>Check browser console (F12) for details</small>
+                            <small>Possible causes:</small><br>
+                            <small>• Network blocking CDN access (cdn.jsdelivr.net, unpkg.com, cdnjs.cloudflare.com)</small><br>
+                            <small>• Ad blocker or privacy extension blocking scripts</small><br>
+                            <small>• Corporate/school firewall restrictions</small><br><br>
+                            <small>See browser console (F12) for technical details</small>
                         </span>`;
                 }
             }
         }
         
-        function setupInteractions() {
-            console.log('Setting up interactions...');
-            
-            // Hover interactions
-            renderer.on('enterNode', ({ node }) => {
-                hoveredNode = node;
-                const neighbors = new Set(graph.neighbors(node));
-                
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', n === node || neighbors.has(n));
-                });
-                
-                graph.forEachEdge((edge, attrs, source, target) => {
-                    if (source === node || target === node) {
-                        graph.setEdgeAttribute(edge, 'color', '#333');
-                        graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 0.75);
-                    } else {
-                        graph.setEdgeAttribute(edge, 'color', '#eee');
-                    }
-                });
-                
-                renderer.refresh();
-            });
-            
-            renderer.on('leaveNode', () => {
-                hoveredNode = null;
-                
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', true);
-                });
-                
-                graph.forEachEdge((edge, attrs) => {
-                    graph.setEdgeAttribute(edge, 'color', '#ccc');
-                    graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
-                });
-                
-                renderer.refresh();
-            });
-            
-            // Search functionality
-            const searchInput = document.getElementById('search');
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase().trim();
-                
-                graph.forEachNode((node, attrs) => {
-                    if (!query) {
-                        graph.setNodeAttribute(node, 'hidden', false);
-                    } else {
-                        const label = attrs.label.toLowerCase();
-                        graph.setNodeAttribute(node, 'hidden', !label.includes(query));
-                    }
-                });
-                
-                renderer.refresh();
-            });
-            
-            // Node appearance reducer
-            renderer.setSetting('nodeReducer', (node, data) => {
-                const res = { ...data };
-                
-                if (hoveredNode && !data.highlighted) {
-                    res.color = '#ddd';
-                    res.size = data.size * 0.7;
-                }
-                
-                if (data.hidden) {
-                    res.hidden = true;
-                }
-                
-                return res;
-            });
-            
-            console.log('✓ Interactions setup complete');
-        }
-        
-        // Start when page loads
-        console.log('Waiting for DOM to load...');
+        // Start when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
