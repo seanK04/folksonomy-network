@@ -563,8 +563,6 @@
                             weight: edge.weight || 1,
                             size: Math.max(1, (edge.weight || 1) * 0.5),
                             color: COLORS.edge,
-                            type: 'curved',
-                            curvature: 0.2
                         });
                     }
                 });
@@ -583,7 +581,7 @@
                     minCameraRatio: 0.1,
                     maxCameraRatio: 10,
                     defaultNodeType: 'circle',
-                    defaultEdgeType: 'curved',
+                    defaultEdgeType: 'line',
                     edgeLabelSize: 12,
                     // Label background settings
                     labelDensity: 0.07,
