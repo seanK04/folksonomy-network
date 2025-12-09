@@ -579,166 +579,170 @@
     document.getElementById('download-btn').addEventListener('click', downloadArchive);
 
     // Initialize
-    async function init() {
-        console.log('=== Init function starting ===');
+    // Initialize
+        async function init() {
+            console.log('=== Init function starting ===');
 
-        try {
-            // Verify libraries
-            if (typeof graphology === 'undefined') {
-                throw new Error('Graphology library not loaded');
-            }
-            if (typeof Sigma === 'undefined') {
-                throw new Error('Sigma library not loaded');
-            }
-
-            console.log('✓ Libraries verified');
-
-            let data;
-
-            // Check if data is embedded (downloaded archive) or needs to be fetched
-            if (EMBEDDED_GRAPH_DATA !== null) {
-                console.log('Using embedded graph data...');
-                data = EMBEDDED_GRAPH_DATA;
-                console.log('✓ Embedded data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
-            } else {
-                // Fetch graph data from server
-                console.log('Fetching graph.json...');
-                const response = await fetch(`graph.json?t=${Date.now()}`);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
+            try {
+                // Verify libraries
+                if (typeof graphology === 'undefined') {
+                    throw new Error('Graphology library not loaded');
+                }
+                if (typeof Sigma === 'undefined') {
+                    throw new Error('Sigma library not loaded');
                 }
 
-                data = await response.json();
-                console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
-            }
+                console.log('✓ Libraries verified');
 
-            // Store for download functionality
-            loadedGraphData = data;
+                let data;
 
-            // Apply refined colors to data
-            data.nodes.forEach(node => {
-                node.color = node.type === 'reading' ? COLORS.reading : COLORS.hashtag;
-            });
+                // Check if data is embedded (downloaded archive) or needs to be fetched
+                if (EMBEDDED_GRAPH_DATA !== null) {
+                    console.log('Using embedded graph data...');
+                    data = EMBEDDED_GRAPH_DATA;
+                    console.log('✓ Embedded data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
+                } else {
+                    // Fetch graph data from server
+                    console.log('Fetching graph.json...');
+                    const response = await fetch(`graph.json?t=${Date.now()}`);
 
-            // Remove loading, show legend
-            document.getElementById('loading').remove();
-            document.getElementById('legend').style.display = 'block';
+                    if (!response.ok) {
+                        throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
+                    }
 
-            // Create graph
-            console.log('Creating graph...');
-            graph = new graphology.Graph();
+                    data = await response.json();
+                    console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
+                }
 
-            // Add all nodes with random initial positions (for force layout)
-            data.nodes.forEach((node) => {
-                graph.addNode(node.id, {
-                    label: node.label,
-                    nodeType: node.type,
-                    size: node.size || 10,
-                    color: node.color,
-                    x: Math.random() * 100,
-                    y: Math.random() * 100,
-                    count: node.count || 0
+                // Store for download functionality
+                loadedGraphData = data;
+
+                // Apply refined colors to data
+                data.nodes.forEach(node => {
+                    node.color = node.type === 'reading' ? COLORS.reading : COLORS.hashtag;
                 });
-            });
 
-            console.log(`✓ Added ${graph.order} nodes`);
-
-            // Add edges
-            data.edges.forEach((edge) => {
-                if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
-                    graph.addEdge(edge.source, edge.target, {
-                        weight: edge.weight || 1,
-                        size: Math.max(1.5, (edge.weight || 1) * 0.8),
-                        color: COLORS.edge
-                    });
+                // Remove loading spinner if it exists, show legend
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.remove();
                 }
-            });
+                document.getElementById('legend').style.display = 'block';
 
-            console.log(`✓ Added ${graph.size} edges`);
+                // Create graph
+                console.log('Creating graph...');
+                graph = new graphology.Graph();
 
-            // Apply Force Atlas 2 layout
-            console.log('Applying force-directed layout...');
+                // Add all nodes with random initial positions (for force layout)
+                data.nodes.forEach((node) => {
+                    graph.addNode(node.id, {
+                        label: node.label,
+                        nodeType: node.type,
+                        size: node.size || 10,
+                        color: node.color,
+                        x: Math.random() * 100,
+                        y: Math.random() * 100,
+                        count: node.count || 0
+                    });
+                });
 
-            if (typeof ForceAtlas2 !== 'undefined') {
-                ForceAtlas2.assign(graph, {
-                    iterations: 100,
-                    settings: {
-                        gravity: 1,
-                        scalingRatio: 10,
-                        strongGravityMode: true,
-                        slowDown: 5,
-                        barnesHutOptimize: graph.order > 100,
-                        barnesHutTheta: 0.5,
-                        adjustSizes: true,
-                        linLogMode: false,
-                        outboundAttractionDistribution: false
+                console.log(`✓ Added ${graph.order} nodes`);
+
+                // Add edges
+                data.edges.forEach((edge) => {
+                    if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
+                        graph.addEdge(edge.source, edge.target, {
+                            weight: edge.weight || 1,
+                            size: Math.max(1.5, (edge.weight || 1) * 0.8),
+                            color: COLORS.edge
+                        });
                     }
                 });
-                console.log('✓ Force-directed layout applied');
-            } else {
-                console.warn('ForceAtlas2 not available, using fallback circular layout');
-                const readingNodes = data.nodes.filter(n => n.type === 'reading');
-                const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
 
-                const centerX = 50;
-                const centerY = 50;
-                const innerRadius = 15;
-                const outerRadius = 40;
+                console.log(`✓ Added ${graph.size} edges`);
 
-                readingNodes.forEach((node, i) => {
-                    const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
-                    graph.setNodeAttribute(node.id, 'x', centerX + innerRadius * Math.cos(angle));
-                    graph.setNodeAttribute(node.id, 'y', centerY + innerRadius * Math.sin(angle));
+                // Apply Force Atlas 2 layout
+                console.log('Applying force-directed layout...');
+
+                if (typeof ForceAtlas2 !== 'undefined') {
+                    ForceAtlas2.assign(graph, {
+                        iterations: 100,
+                        settings: {
+                            gravity: 1,
+                            scalingRatio: 10,
+                            strongGravityMode: true,
+                            slowDown: 5,
+                            barnesHutOptimize: graph.order > 100,
+                            barnesHutTheta: 0.5,
+                            adjustSizes: true,
+                            linLogMode: false,
+                            outboundAttractionDistribution: false
+                        }
+                    });
+                    console.log('✓ Force-directed layout applied');
+                } else {
+                    console.warn('ForceAtlas2 not available, using fallback circular layout');
+                    const readingNodes = data.nodes.filter(n => n.type === 'reading');
+                    const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
+
+                    const centerX = 50;
+                    const centerY = 50;
+                    const innerRadius = 15;
+                    const outerRadius = 40;
+
+                    readingNodes.forEach((node, i) => {
+                        const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
+                        graph.setNodeAttribute(node.id, 'x', centerX + innerRadius * Math.cos(angle));
+                        graph.setNodeAttribute(node.id, 'y', centerY + innerRadius * Math.sin(angle));
+                    });
+
+                    hashtagNodes.forEach((node, i) => {
+                        const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
+                        graph.setNodeAttribute(node.id, 'x', centerX + outerRadius * Math.cos(angle));
+                        graph.setNodeAttribute(node.id, 'y', centerY + outerRadius * Math.sin(angle));
+                    });
+                }
+
+                // Create Sigma renderer
+                console.log('Creating Sigma renderer...');
+                const container = document.getElementById('container');
+                renderer = new Sigma(graph, container, {
+                    renderEdgeLabels: false,
+                    labelSize: 13,
+                    labelWeight: '500',
+                    labelFont: 'Inter, sans-serif',
+                    labelColor: { color: '#1e3a5f' },
+                    minCameraRatio: 0.1,
+                    maxCameraRatio: 10,
+                    defaultNodeType: 'circle',
+                    defaultEdgeType: 'line',
+                    edgeLabelSize: 12,
+                    labelDensity: 0.07,
+                    labelGridCellSize: 60,
+                    labelRenderedSizeThreshold: 6
                 });
 
-                hashtagNodes.forEach((node, i) => {
-                    const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
-                    graph.setNodeAttribute(node.id, 'x', centerX + outerRadius * Math.cos(angle));
-                    graph.setNodeAttribute(node.id, 'y', centerY + outerRadius * Math.sin(angle));
-                });
-            }
+                console.log('✓ Renderer created');
 
-            // Create Sigma renderer
-            console.log('Creating Sigma renderer...');
-            const container = document.getElementById('container');
-            renderer = new Sigma(graph, container, {
-                renderEdgeLabels: false,
-                labelSize: 13,
-                labelWeight: '500',
-                labelFont: 'Inter, sans-serif',
-                labelColor: { color: '#1e3a5f' },
-                minCameraRatio: 0.1,
-                maxCameraRatio: 10,
-                defaultNodeType: 'circle',
-                defaultEdgeType: 'line',
-                edgeLabelSize: 12,
-                labelDensity: 0.07,
-                labelGridCellSize: 60,
-                labelRenderedSizeThreshold: 6
-            });
+                // Setup interactions
+                setupInteractions();
 
-            console.log('✓ Renderer created');
+                console.log('=== SUCCESS: Network rendered ===');
 
-            // Setup interactions
-            setupInteractions();
+            } catch (error) {
+                console.error('=== ERROR ===', error);
 
-            console.log('=== SUCCESS: Network rendered ===');
-
-        } catch (error) {
-            console.error('=== ERROR ===', error);
-
-            const loadingEl = document.getElementById('loading');
-            if (loadingEl) {
-                loadingEl.innerHTML =
-                    `<span style="color: #e74c3c;">
-                        <strong>Error:</strong> ${error.message}<br><br>
-                        <small>Check browser console (F12) for details</small>
-                    </span>`;
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.innerHTML =
+                        `<span style="color: #e74c3c;">
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    <small>Check browser console (F12) for details</small>
+                </span>`;
+                }
             }
         }
-    }
-
+        
     function setupInteractions() {
         console.log('Setting up interactions...');
 
