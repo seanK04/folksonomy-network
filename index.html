@@ -14,6 +14,9 @@
     <!-- Official CDN URLs from sigma.js documentation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
+    <!-- Force Atlas 2 layout algorithm -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/graphology-layout-forceatlas2/0.10.1/graphology-layout-forceatlas2.min.js"></script>
 
     <style>
         * {
@@ -461,15 +464,16 @@
         console.log('=== Script starting ===');
         console.log('Graphology available?', typeof graphology !== 'undefined');
         console.log('Sigma available?', typeof Sigma !== 'undefined');
+        console.log('ForceAtlas2 available?', typeof ForceAtlas2 !== 'undefined');
 
-        // Refined color palette
+        // Refined color palette - MORE VISIBLE EDGES
         const COLORS = {
             reading: '#3d8fd1',      // Refined teal-blue
             hashtag: '#e8a838',      // Warm amber
-            edge: 'rgba(180, 190, 200, 0.5)',
+            edge: '#9aa5b1',         // Solid gray - much more visible
             edgeHighlight: '#1e3a5f',
-            edgeDim: 'rgba(200, 200, 200, 0.2)',
-            nodeDim: '#e0e0e0'
+            edgeDim: 'rgba(200, 200, 200, 0.25)',
+            nodeDim: '#d0d0d0'
         };
 
         // State
@@ -517,59 +521,79 @@
                 console.log('Creating graph...');
                 graph = new graphology.Graph();
 
-                // Separate nodes by type for layout
-                const readingNodes = data.nodes.filter(n => n.type === 'reading');
-                const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
-
-                const centerX = 500;
-                const centerY = 400;
-                const innerRadius = 150;
-                const outerRadius = 350;
-
-                // Add reading nodes (inner circle)
-                readingNodes.forEach((node, i) => {
-                    const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
+                // Add all nodes with random initial positions (for force layout)
+                data.nodes.forEach((node) => {
                     graph.addNode(node.id, {
                         label: node.label,
                         nodeType: node.type,
                         size: node.size || 10,
                         color: node.color,
-                        x: centerX + innerRadius * Math.cos(angle),
-                        y: centerY + innerRadius * Math.sin(angle),
-                        count: node.count || 0
-                    });
-                });
-
-                // Add hashtag nodes (outer circle)
-                hashtagNodes.forEach((node, i) => {
-                    const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
-                    graph.addNode(node.id, {
-                        label: node.label,
-                        nodeType: node.type,
-                        size: node.size || 10,
-                        color: node.color,
-                        x: centerX + outerRadius * Math.cos(angle),
-                        y: centerY + outerRadius * Math.sin(angle),
+                        x: Math.random() * 100,
+                        y: Math.random() * 100,
                         count: node.count || 0
                     });
                 });
 
                 console.log(`✓ Added ${graph.order} nodes`);
 
-                // Add edges with curved type
-                data.edges.forEach((edge, index) => {
+                // Add edges
+                data.edges.forEach((edge) => {
                     if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
                         graph.addEdge(edge.source, edge.target, {
                             weight: edge.weight || 1,
-                            size: Math.max(1, (edge.weight || 1) * 0.5),
-                            color: COLORS.edge,
+                            size: Math.max(1.5, (edge.weight || 1) * 0.8),  // Thicker edges
+                            color: COLORS.edge
                         });
                     }
                 });
 
                 console.log(`✓ Added ${graph.size} edges`);
 
-                // Create Sigma renderer with label backgrounds
+                // Apply Force Atlas 2 layout
+                console.log('Applying force-directed layout...');
+
+                if (typeof ForceAtlas2 !== 'undefined') {
+                    // Run ForceAtlas2 synchronously for a set number of iterations
+                    ForceAtlas2.assign(graph, {
+                        iterations: 100,
+                        settings: {
+                            gravity: 1,
+                            scalingRatio: 10,
+                            strongGravityMode: true,
+                            slowDown: 5,
+                            barnesHutOptimize: graph.order > 100,
+                            barnesHutTheta: 0.5,
+                            adjustSizes: true,
+                            linLogMode: false,
+                            outboundAttractionDistribution: false
+                        }
+                    });
+                    console.log('✓ Force-directed layout applied');
+                } else {
+                    console.warn('ForceAtlas2 not available, using fallback circular layout');
+                    // Fallback to circular layout
+                    const readingNodes = data.nodes.filter(n => n.type === 'reading');
+                    const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
+
+                    const centerX = 50;
+                    const centerY = 50;
+                    const innerRadius = 15;
+                    const outerRadius = 40;
+
+                    readingNodes.forEach((node, i) => {
+                        const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
+                        graph.setNodeAttribute(node.id, 'x', centerX + innerRadius * Math.cos(angle));
+                        graph.setNodeAttribute(node.id, 'y', centerY + innerRadius * Math.sin(angle));
+                    });
+
+                    hashtagNodes.forEach((node, i) => {
+                        const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
+                        graph.setNodeAttribute(node.id, 'x', centerX + outerRadius * Math.cos(angle));
+                        graph.setNodeAttribute(node.id, 'y', centerY + outerRadius * Math.sin(angle));
+                    });
+                }
+
+                // Create Sigma renderer
                 console.log('Creating Sigma renderer...');
                 const container = document.getElementById('container');
                 renderer = new Sigma(graph, container, {
@@ -583,13 +607,9 @@
                     defaultNodeType: 'circle',
                     defaultEdgeType: 'line',
                     edgeLabelSize: 12,
-                    // Label background settings
                     labelDensity: 0.07,
                     labelGridCellSize: 60,
-                    labelRenderedSizeThreshold: 6,
-                    // Node border for better visibility
-                    nodeBorderSize: 2,
-                    nodeBorderColor: { attribute: 'borderColor', defaultValue: '#ffffff' }
+                    labelRenderedSizeThreshold: 6
                 });
 
                 console.log('✓ Renderer created');
@@ -634,7 +654,6 @@
 
                 neighbors.forEach(neighborId => {
                     const neighborAttrs = graph.getNodeAttributes(neighborId);
-                    // Get edge weight
                     const edge = graph.edge(nodeId, neighborId);
                     const weight = edge ? graph.getEdgeAttribute(edge, 'weight') : 1;
 
@@ -652,7 +671,6 @@
                     }
                 });
 
-                // Sort by weight (most connections first)
                 connectedReadings.sort((a, b) => b.weight - a.weight);
                 connectedHashtags.sort((a, b) => b.weight - a.weight);
 
@@ -695,12 +713,10 @@
                     <div class="tooltip-hint">Click to see all connections</div>
                 `;
 
-                // Position tooltip
                 const containerRect = document.getElementById('container').getBoundingClientRect();
                 let left = mouseX - containerRect.left + 15;
                 let top = mouseY - containerRect.top + 15;
 
-                // Keep tooltip in viewport
                 if (left + 280 > containerRect.width) {
                     left = mouseX - containerRect.left - 295;
                 }
@@ -712,7 +728,6 @@
                 tooltip.style.top = `${top}px`;
                 tooltip.style.display = 'block';
 
-                // Trigger transition
                 requestAnimationFrame(() => {
                     tooltip.classList.add('visible');
                 });
@@ -733,15 +748,12 @@
                 const attrs = graph.getNodeAttributes(nodeId);
                 const info = getConnectionInfo(nodeId);
 
-                // Set title and type
                 panelTitle.textContent = attrs.label;
                 panelType.textContent = attrs.nodeType;
                 panelType.className = `panel-type ${attrs.nodeType}`;
 
-                // Build content
                 let contentHtml = '';
 
-                // Stats summary
                 if (info.isReading) {
                     contentHtml += `
                         <div class="panel-stats">
@@ -759,7 +771,6 @@
                     `;
                 }
 
-                // List connected nodes
                 if (info.isReading && info.connectedHashtags.length > 0) {
                     contentHtml += `
                         <div class="panel-section-title">Connected Hashtags</div>
@@ -792,7 +803,6 @@
                 detailPanel.style.display = 'flex';
                 selectedNode = nodeId;
 
-                // Update highlighting for selected node
                 updateHighlighting();
             }
 
@@ -801,13 +811,12 @@
                 detailPanel.style.display = 'none';
                 selectedNode = null;
 
-                // Reset highlighting if not hovering
                 if (!hoveredNode) {
                     resetHighlighting();
                 }
             }
 
-            // Update highlighting based on hovered or selected node - with smooth transitions via CSS
+            // Update highlighting based on hovered or selected node
             function updateHighlighting() {
                 const activeNode = hoveredNode || selectedNode;
 
@@ -825,7 +834,7 @@
                 graph.forEachEdge((edge, attrs, source, target) => {
                     if (source === activeNode || target === activeNode) {
                         graph.setEdgeAttribute(edge, 'color', COLORS.edgeHighlight);
-                        graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 1);
+                        graph.setEdgeAttribute(edge, 'size', Math.max(2, (attrs.weight || 1) * 1.2));
                     } else {
                         graph.setEdgeAttribute(edge, 'color', COLORS.edgeDim);
                     }
@@ -842,7 +851,7 @@
 
                 graph.forEachEdge((edge, attrs) => {
                     graph.setEdgeAttribute(edge, 'color', COLORS.edge);
-                    graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
+                    graph.setEdgeAttribute(edge, 'size', Math.max(1.5, (attrs.weight || 1) * 0.8));
                 });
 
                 renderer.refresh();
@@ -864,7 +873,6 @@
                 mouseX = e.clientX;
                 mouseY = e.clientY;
 
-                // Update tooltip position if visible
                 if (hoveredNode && tooltip.style.display === 'block') {
                     const containerRect = document.getElementById('container').getBoundingClientRect();
                     let left = mouseX - containerRect.left + 15;
@@ -893,7 +901,6 @@
                 hoveredNode = null;
                 hideTooltip();
 
-                // If a node is selected, keep that highlighting
                 if (selectedNode) {
                     updateHighlighting();
                 } else {
@@ -923,7 +930,7 @@
                 renderer.refresh();
             });
 
-            // Visual reducer for hover/selection effect - uses color interpolation for smoother feel
+            // Visual reducer for hover/selection effect
             renderer.setSetting('nodeReducer', (node, data) => {
                 const res = { ...data };
                 const activeNode = hoveredNode || selectedNode;
