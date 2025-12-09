@@ -513,14 +513,17 @@
     console.log('Sigma available?', typeof Sigma !== 'undefined');
     console.log('ForceAtlas2 available?', typeof ForceAtlas2 !== 'undefined');
 
+    // EMBEDDED DATA PLACEHOLDER - Will be replaced with actual data in downloaded version
+    let EMBEDDED_GRAPH_DATA = null;
+
     // Global variable to store loaded graph data for download functionality
     let loadedGraphData = null;
 
     // Refined color palette - MORE VISIBLE EDGES
     const COLORS = {
-        reading: '#3d8fd1',      // Refined teal-blue
-        hashtag: '#e8a838',      // Warm amber
-        edge: '#9aa5b1',         // Solid gray - much more visible
+        reading: '#3d8fd1',
+        hashtag: '#e8a838',
+        edge: '#9aa5b1',
         edgeHighlight: '#1e3a5f',
         edgeDim: 'rgba(200, 200, 200, 0.25)',
         nodeDim: '#d0d0d0'
@@ -544,38 +547,22 @@
         const dateStr = now.toISOString().split('T')[0];
         const filename = `folksonomy_archive_${dateStr}.html`;
 
-        // Clone the HTML but inject embedded data
-        const htmlDoc = document.documentElement.cloneNode(true);
+        // Read current HTML
+        let htmlContent = document.documentElement.outerHTML;
 
-        // Find the script tag and modify it
-        const scripts = htmlDoc.getElementsByTagName('script');
-        const mainScript = scripts[scripts.length - 1]; // Get the last script (our main script)
-
-        // Replace the fetch section with embedded data
-        let scriptContent = mainScript.textContent;
-
-        // Replace the entire fetch/response block
-        scriptContent = scriptContent.replace(
-            /console\.log\('Fetching graph\.json\.\.\.'\);[\s\S]*?const data = await response\.json\(\);[\s\S]*?loadedGraphData = data;[\s\S]*?console\.log\('✓ Data loaded:',[\s\S]*?\);/,
-            `console.log('Loading embedded graph data...');
-                
-                // Embedded graph data (generated ${now.toISOString()})
-                const data = ${JSON.stringify(loadedGraphData, null, 2)};
-                
-                // Store for download functionality
-                loadedGraphData = data;
-                
-                console.log('✓ Embedded data loaded:', \`\${data.nodes.length} nodes, \${data.edges.length} edges\`);`
+        // Simple and reliable replacement: replace the placeholder line
+        htmlContent = htmlContent.replace(
+            'let EMBEDDED_GRAPH_DATA = null;',
+            `let EMBEDDED_GRAPH_DATA = ${JSON.stringify(loadedGraphData, null, 2)};`
         );
 
-        mainScript.textContent = scriptContent;
-
-        // Serialize the modified HTML
-        const serializer = new XMLSerializer();
-        const htmlContent = serializer.serializeToString(htmlDoc);
+        // Add DOCTYPE
+        if (!htmlContent.startsWith('<!DOCTYPE')) {
+            htmlContent = '<!DOCTYPE html>\n' + htmlContent;
+        }
 
         // Create blob and download
-        const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
+        const blob = new Blob([htmlContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -606,20 +593,28 @@
 
             console.log('✓ Libraries verified');
 
-            // Fetch graph data
-            console.log('Fetching graph.json...');
-            const response = await fetch(`graph.json?t=${Date.now()}`);
+            let data;
 
-            if (!response.ok) {
-                throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
+            // Check if data is embedded (downloaded archive) or needs to be fetched
+            if (EMBEDDED_GRAPH_DATA !== null) {
+                console.log('Using embedded graph data...');
+                data = EMBEDDED_GRAPH_DATA;
+                console.log('✓ Embedded data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
+            } else {
+                // Fetch graph data from server
+                console.log('Fetching graph.json...');
+                const response = await fetch(`graph.json?t=${Date.now()}`);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
+                }
+
+                data = await response.json();
+                console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
             }
-
-            const data = await response.json();
 
             // Store for download functionality
             loadedGraphData = data;
-
-            console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
 
             // Apply refined colors to data
             data.nodes.forEach(node => {
@@ -654,7 +649,7 @@
                 if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
                     graph.addEdge(edge.source, edge.target, {
                         weight: edge.weight || 1,
-                        size: Math.max(1.5, (edge.weight || 1) * 0.8),  // Thicker edges
+                        size: Math.max(1.5, (edge.weight || 1) * 0.8),
                         color: COLORS.edge
                     });
                 }
@@ -666,7 +661,6 @@
             console.log('Applying force-directed layout...');
 
             if (typeof ForceAtlas2 !== 'undefined') {
-                // Run ForceAtlas2 synchronously for a set number of iterations
                 ForceAtlas2.assign(graph, {
                     iterations: 100,
                     settings: {
@@ -684,7 +678,6 @@
                 console.log('✓ Force-directed layout applied');
             } else {
                 console.warn('ForceAtlas2 not available, using fallback circular layout');
-                // Fallback to circular layout
                 const readingNodes = data.nodes.filter(n => n.type === 'reading');
                 const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
 
