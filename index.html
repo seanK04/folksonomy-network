@@ -166,6 +166,152 @@
             margin: 2px 0;
         }
 
+        #tooltip .tooltip-hint {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-style: italic;
+        }
+
+        /* Detail panel styles */
+        #detail-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            font-size: 13px;
+            z-index: 50;
+            max-width: 320px;
+            max-height: calc(100% - 40px);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #detail-panel .panel-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        #detail-panel .panel-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #2c3e50;
+            word-break: break-word;
+        }
+
+        #detail-panel .panel-type {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        #detail-panel .panel-type.reading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        #detail-panel .panel-type.hashtag {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        #detail-panel .panel-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        #detail-panel .panel-close:hover {
+            color: #333;
+        }
+
+        #detail-panel .panel-content {
+            padding: 14px 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        #detail-panel .panel-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        #detail-panel .panel-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #detail-panel .panel-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #detail-panel .panel-list li:last-child {
+            border-bottom: none;
+        }
+
+        #detail-panel .panel-list .node-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        #detail-panel .panel-list .node-dot.reading {
+            background: #4A90E2;
+        }
+
+        #detail-panel .panel-list .node-dot.hashtag {
+            background: #F39C12;
+        }
+
+        #detail-panel .panel-list .node-label {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        #detail-panel .panel-list .node-weight {
+            font-size: 11px;
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        #detail-panel .panel-stats {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
         @media (max-width: 600px) {
             #header h1 {
                 font-size: 18px;
@@ -184,6 +330,13 @@
             #tooltip {
                 font-size: 12px;
                 max-width: 220px;
+            }
+
+            #detail-panel {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                top: 10px;
             }
         }
     </style>
@@ -212,11 +365,22 @@
                 <span>Hashtags</span>
             </div>
             <div style="margin-top: 10px; font-size: 11px; color: #666;">
-                Hover over nodes to highlight connections<br>
-                Click and drag to pan • Scroll to zoom
+                Hover over nodes to see details<br>
+                Click a node to see all connections<br>
+                Drag to pan • Scroll to zoom
             </div>
         </div>
         <div id="tooltip"></div>
+        <div id="detail-panel">
+            <button class="panel-close" aria-label="Close panel">&times;</button>
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title"></div>
+                </div>
+                <span class="panel-type"></span>
+            </div>
+            <div class="panel-content"></div>
+        </div>
     </div>
 
     <script>
@@ -228,6 +392,7 @@
         let graph;
         let renderer;
         let hoveredNode = null;
+        let selectedNode = null;
 
         // Initialize
         async function init() {
@@ -353,6 +518,11 @@
             console.log('Setting up interactions...');
 
             const tooltip = document.getElementById('tooltip');
+            const detailPanel = document.getElementById('detail-panel');
+            const panelClose = detailPanel.querySelector('.panel-close');
+            const panelTitle = detailPanel.querySelector('.panel-title');
+            const panelType = detailPanel.querySelector('.panel-type');
+            const panelContent = detailPanel.querySelector('.panel-content');
 
             // Helper function to get connection info for a node
             function getConnectionInfo(nodeId) {
@@ -360,17 +530,32 @@
                 const nodeAttrs = graph.getNodeAttributes(nodeId);
                 const isReading = nodeAttrs.nodeType === 'reading';
 
-                let connectedReadings = 0;
-                let connectedHashtags = 0;
+                let connectedReadings = [];
+                let connectedHashtags = [];
 
                 neighbors.forEach(neighborId => {
                     const neighborAttrs = graph.getNodeAttributes(neighborId);
+                    // Get edge weight
+                    const edge = graph.edge(nodeId, neighborId);
+                    const weight = edge ? graph.getEdgeAttribute(edge, 'weight') : 1;
+
+                    const connectionInfo = {
+                        id: neighborId,
+                        label: neighborAttrs.label,
+                        type: neighborAttrs.nodeType,
+                        weight: weight
+                    };
+
                     if (neighborAttrs.nodeType === 'reading') {
-                        connectedReadings++;
+                        connectedReadings.push(connectionInfo);
                     } else {
-                        connectedHashtags++;
+                        connectedHashtags.push(connectionInfo);
                     }
                 });
+
+                // Sort by weight (most connections first)
+                connectedReadings.sort((a, b) => b.weight - a.weight);
+                connectedHashtags.sort((a, b) => b.weight - a.weight);
 
                 return {
                     isReading,
@@ -389,7 +574,7 @@
                 if (info.isReading) {
                     statsHtml = `
                         <div class="tooltip-stats">
-                            <span>Connected to <strong>${info.connectedHashtags}</strong> hashtag${info.connectedHashtags !== 1 ? 's' : ''}</span>
+                            <span>Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}</span>
                         </div>
                     `;
                 } else {
@@ -398,7 +583,7 @@
                         : '';
                     statsHtml = `
                         <div class="tooltip-stats">
-                            <span>Connected to <strong>${info.connectedReadings}</strong> reading${info.connectedReadings !== 1 ? 's' : ''}</span>
+                            <span>Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}</span>
                             ${usageText ? `<span>${usageText}</span>` : ''}
                         </div>
                     `;
@@ -408,6 +593,7 @@
                     <div class="tooltip-label">${attrs.label}</div>
                     <div class="tooltip-type ${attrs.nodeType}">${attrs.nodeType}</div>
                     ${statsHtml}
+                    <div class="tooltip-hint">Click to see all connections</div>
                 `;
 
                 // Position tooltip
@@ -416,7 +602,6 @@
                 let top = mouseY - containerRect.top + 15;
 
                 // Keep tooltip in viewport
-                const tooltipRect = tooltip.getBoundingClientRect();
                 if (left + 280 > containerRect.width) {
                     left = mouseX - containerRect.left - 295;
                 }
@@ -433,6 +618,136 @@
             function hideTooltip() {
                 tooltip.style.display = 'none';
             }
+
+            // Show detail panel
+            function showDetailPanel(nodeId) {
+                const attrs = graph.getNodeAttributes(nodeId);
+                const info = getConnectionInfo(nodeId);
+
+                // Set title and type
+                panelTitle.textContent = attrs.label;
+                panelType.textContent = attrs.nodeType;
+                panelType.className = `panel-type ${attrs.nodeType}`;
+
+                // Build content
+                let contentHtml = '';
+
+                // Stats summary
+                if (info.isReading) {
+                    contentHtml += `
+                        <div class="panel-stats">
+                            Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}
+                        </div>
+                    `;
+                } else {
+                    const usageText = attrs.count > 0
+                        ? ` • Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
+                        : '';
+                    contentHtml += `
+                        <div class="panel-stats">
+                            Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}${usageText}
+                        </div>
+                    `;
+                }
+
+                // List connected nodes
+                if (info.isReading && info.connectedHashtags.length > 0) {
+                    contentHtml += `
+                        <div class="panel-section-title">Connected Hashtags</div>
+                        <ul class="panel-list">
+                            ${info.connectedHashtags.map(node => `
+                                <li>
+                                    <span class="node-dot hashtag"></span>
+                                    <span class="node-label">${node.label}</span>
+                                    ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else if (!info.isReading && info.connectedReadings.length > 0) {
+                    contentHtml += `
+                        <div class="panel-section-title">Connected Readings</div>
+                        <ul class="panel-list">
+                            ${info.connectedReadings.map(node => `
+                                <li>
+                                    <span class="node-dot reading"></span>
+                                    <span class="node-label">${node.label}</span>
+                                    ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                }
+
+                panelContent.innerHTML = contentHtml;
+                detailPanel.style.display = 'flex';
+                selectedNode = nodeId;
+
+                // Update highlighting for selected node
+                updateHighlighting();
+            }
+
+            // Hide detail panel
+            function hideDetailPanel() {
+                detailPanel.style.display = 'none';
+                selectedNode = null;
+
+                // Reset highlighting if not hovering
+                if (!hoveredNode) {
+                    resetHighlighting();
+                }
+            }
+
+            // Update highlighting based on hovered or selected node
+            function updateHighlighting() {
+                const activeNode = hoveredNode || selectedNode;
+
+                if (!activeNode) {
+                    resetHighlighting();
+                    return;
+                }
+
+                const neighbors = new Set(graph.neighbors(activeNode));
+
+                graph.forEachNode((n) => {
+                    graph.setNodeAttribute(n, 'highlighted', n === activeNode || neighbors.has(n));
+                });
+
+                graph.forEachEdge((edge, attrs, source, target) => {
+                    if (source === activeNode || target === activeNode) {
+                        graph.setEdgeAttribute(edge, 'color', '#333');
+                        graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 0.75);
+                    } else {
+                        graph.setEdgeAttribute(edge, 'color', '#eee');
+                    }
+                });
+
+                renderer.refresh();
+            }
+
+            // Reset highlighting
+            function resetHighlighting() {
+                graph.forEachNode((n) => {
+                    graph.setNodeAttribute(n, 'highlighted', true);
+                });
+
+                graph.forEachEdge((edge, attrs) => {
+                    graph.setEdgeAttribute(edge, 'color', '#ccc');
+                    graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
+                });
+
+                renderer.refresh();
+            }
+
+            // Close panel button
+            panelClose.addEventListener('click', () => {
+                hideDetailPanel();
+            });
+
+            // Close panel when clicking on canvas (not on a node)
+            renderer.on('clickStage', () => {
+                hideDetailPanel();
+            });
 
             // Track mouse position for tooltip
             let mouseX = 0, mouseY = 0;
@@ -458,45 +773,28 @@
                 }
             });
 
-            // Hover to highlight
+            // Hover to highlight and show tooltip
             renderer.on('enterNode', ({ node }) => {
                 hoveredNode = node;
-                const neighbors = new Set(graph.neighbors(node));
-
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', n === node || neighbors.has(n));
-                });
-
-                graph.forEachEdge((edge, attrs, source, target) => {
-                    if (source === node || target === node) {
-                        graph.setEdgeAttribute(edge, 'color', '#333');
-                        graph.setEdgeAttribute(edge, 'size', (attrs.weight || 1) * 0.75);
-                    } else {
-                        graph.setEdgeAttribute(edge, 'color', '#eee');
-                    }
-                });
-
-                renderer.refresh();
-
-                // Show tooltip
+                updateHighlighting();
                 showTooltip(node, mouseX, mouseY);
             });
 
             renderer.on('leaveNode', () => {
                 hoveredNode = null;
+                hideTooltip();
 
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', true);
-                });
+                // If a node is selected, keep that highlighting
+                if (selectedNode) {
+                    updateHighlighting();
+                } else {
+                    resetHighlighting();
+                }
+            });
 
-                graph.forEachEdge((edge, attrs) => {
-                    graph.setEdgeAttribute(edge, 'color', '#ccc');
-                    graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
-                });
-
-                renderer.refresh();
-
-                // Hide tooltip
+            // Click to show detail panel
+            renderer.on('clickNode', ({ node }) => {
+                showDetailPanel(node);
                 hideTooltip();
             });
 
@@ -516,11 +814,12 @@
                 renderer.refresh();
             });
 
-            // Visual reducer for hover effect
+            // Visual reducer for hover/selection effect
             renderer.setSetting('nodeReducer', (node, data) => {
                 const res = { ...data };
+                const activeNode = hoveredNode || selectedNode;
 
-                if (hoveredNode && !data.highlighted) {
+                if (activeNode && !data.highlighted) {
                     res.color = '#ddd';
                     res.size = data.size * 0.7;
                 }
