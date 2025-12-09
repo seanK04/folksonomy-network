@@ -534,197 +534,59 @@
 
         // Download functionality
         function downloadArchive() {
-            if (!loadedGraphData) {
-                alert('No graph data available to download. Please wait for the graph to load.');
-                return;
-            }
-
-            // Get current date for filename
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-            const filename = `folksonomy_archive_${dateStr}.html`;
-
-            // Read the current HTML document
-            const htmlContent = document.documentElement.outerHTML;
-
-            // Create embedded version by replacing the fetch call with embedded data
-            const embeddedHTML = htmlContent.replace(
-                /const response = await fetch\(`graph\.json\?t=\$\{Date\.now\(\)\}`\);[\s\S]*?const data = await response\.json\(\);/,
-                `// Embedded graph data (generated ${now.toISOString()})
-                const data = ${JSON.stringify(loadedGraphData, null, 2)};`
-            );
-
-            // Create blob and download
-            const blob = new Blob([embeddedHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            console.log(`✓ Downloaded archive: ${filename}`);
-        }
-
-        // Attach download handler
-        document.getElementById('download-btn').addEventListener('click', downloadArchive);
-
-        // Initialize
-        async function init() {
-            console.log('=== Init function starting ===');
-
-            try {
-                // Verify libraries
-                if (typeof graphology === 'undefined') {
-                    throw new Error('Graphology library not loaded');
-                }
-                if (typeof Sigma === 'undefined') {
-                    throw new Error('Sigma library not loaded');
+                if (!loadedGraphData) {
+                    alert('No graph data available to download. Please wait for the graph to load.');
+                    return;
                 }
 
-                console.log('✓ Libraries verified');
+                // Get current date for filename
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0];
+                const filename = `folksonomy_archive_${dateStr}.html`;
 
-                // Fetch graph data
-                console.log('Fetching graph.json...');
-                const response = await fetch(`graph.json?t=${Date.now()}`);
+                // Clone the HTML but inject embedded data
+                const htmlDoc = document.documentElement.cloneNode(true);
 
-                if (!response.ok) {
-                    throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
-                }
+                // Find the script tag and modify it
+                const scripts = htmlDoc.getElementsByTagName('script');
+                const mainScript = scripts[scripts.length - 1]; // Get the last script (our main script)
 
-                const data = await response.json();
+                // Replace the fetch section with embedded data
+                let scriptContent = mainScript.textContent;
 
+                // Replace the entire fetch/response block
+                scriptContent = scriptContent.replace(
+                    /console\.log\('Fetching graph\.json\.\.\.'\);[\s\S]*?const data = await response\.json\(\);[\s\S]*?loadedGraphData = data;[\s\S]*?console\.log\('✓ Data loaded:',[\s\S]*?\);/,
+                    `console.log('Loading embedded graph data...');
+                
+                // Embedded graph data (generated ${now.toISOString()})
+                const data = ${JSON.stringify(loadedGraphData, null, 2)};
+                
                 // Store for download functionality
                 loadedGraphData = data;
+                
+                console.log('✓ Embedded data loaded:', \`\${data.nodes.length} nodes, \${data.edges.length} edges\`);`
+                );
 
-                console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
+                mainScript.textContent = scriptContent;
 
-                // Apply refined colors to data
-                data.nodes.forEach(node => {
-                    node.color = node.type === 'reading' ? COLORS.reading : COLORS.hashtag;
-                });
+                // Serialize the modified HTML
+                const serializer = new XMLSerializer();
+                const htmlContent = serializer.serializeToString(htmlDoc);
 
-                // Remove loading, show legend
-                document.getElementById('loading').remove();
-                document.getElementById('legend').style.display = 'block';
+                // Create blob and download
+                const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 
-                // Create graph
-                console.log('Creating graph...');
-                graph = new graphology.Graph();
-
-                // Add all nodes with random initial positions (for force layout)
-                data.nodes.forEach((node) => {
-                    graph.addNode(node.id, {
-                        label: node.label,
-                        nodeType: node.type,
-                        size: node.size || 10,
-                        color: node.color,
-                        x: Math.random() * 100,
-                        y: Math.random() * 100,
-                        count: node.count || 0
-                    });
-                });
-
-                console.log(`✓ Added ${graph.order} nodes`);
-
-                // Add edges
-                data.edges.forEach((edge) => {
-                    if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
-                        graph.addEdge(edge.source, edge.target, {
-                            weight: edge.weight || 1,
-                            size: Math.max(1.5, (edge.weight || 1) * 0.8),  // Thicker edges
-                            color: COLORS.edge
-                        });
-                    }
-                });
-
-                console.log(`✓ Added ${graph.size} edges`);
-
-                // Apply Force Atlas 2 layout
-                console.log('Applying force-directed layout...');
-
-                if (typeof ForceAtlas2 !== 'undefined') {
-                    // Run ForceAtlas2 synchronously for a set number of iterations
-                    ForceAtlas2.assign(graph, {
-                        iterations: 100,
-                        settings: {
-                            gravity: 1,
-                            scalingRatio: 10,
-                            strongGravityMode: true,
-                            slowDown: 5,
-                            barnesHutOptimize: graph.order > 100,
-                            barnesHutTheta: 0.5,
-                            adjustSizes: true,
-                            linLogMode: false,
-                            outboundAttractionDistribution: false
-                        }
-                    });
-                    console.log('✓ Force-directed layout applied');
-                } else {
-                    console.warn('ForceAtlas2 not available, using fallback circular layout');
-                    // Fallback to circular layout
-                    const readingNodes = data.nodes.filter(n => n.type === 'reading');
-                    const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
-
-                    const centerX = 50;
-                    const centerY = 50;
-                    const innerRadius = 15;
-                    const outerRadius = 40;
-
-                    readingNodes.forEach((node, i) => {
-                        const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
-                        graph.setNodeAttribute(node.id, 'x', centerX + innerRadius * Math.cos(angle));
-                        graph.setNodeAttribute(node.id, 'y', centerY + innerRadius * Math.sin(angle));
-                    });
-
-                    hashtagNodes.forEach((node, i) => {
-                        const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
-                        graph.setNodeAttribute(node.id, 'x', centerX + outerRadius * Math.cos(angle));
-                        graph.setNodeAttribute(node.id, 'y', centerY + outerRadius * Math.sin(angle));
-                    });
-                }
-
-                // Create Sigma renderer
-                console.log('Creating Sigma renderer...');
-                const container = document.getElementById('container');
-                renderer = new Sigma(graph, container, {
-                    renderEdgeLabels: false,
-                    labelSize: 13,
-                    labelWeight: '500',
-                    labelFont: 'Inter, sans-serif',
-                    labelColor: { color: '#1e3a5f' },
-                    minCameraRatio: 0.1,
-                    maxCameraRatio: 10,
-                    defaultNodeType: 'circle',
-                    defaultEdgeType: 'line',
-                    edgeLabelSize: 12,
-                    labelDensity: 0.07,
-                    labelGridCellSize: 60,
-                    labelRenderedSizeThreshold: 6
-                });
-
-                console.log('✓ Renderer created');
-
-                // Setup interactions
-                setupInteractions();
-
-                console.log('=== SUCCESS: Network rendered ===');
-
-            } catch (error) {
-                console.error('=== ERROR ===', error);
-
-                const loadingEl = document.getElementById('loading');
-                if (loadingEl) {
-                    loadingEl.innerHTML =
-                        `<span style="color: #e74c3c;">
-                            <strong>Error:</strong> ${error.message}<br><br>
-                            <small>Check browser console (F12) for details</small>
-                        </span>`;
-                }
-            }
-        }
+                console.log(`✓ Downloaded archive: ${filename}`);
+    }
 
         function setupInteractions() {
             console.log('Setting up interactions...');
