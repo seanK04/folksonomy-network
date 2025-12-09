@@ -1,47 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENGL1190M Folksonomy Network</title>
-    
+
     <!-- Official CDN URLs from sigma.js documentation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphology/0.25.4/graphology.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
-    
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: #f5f5f5;
             overflow: hidden;
         }
-        
+
         #header {
             background: #2c3e50;
             color: white;
             padding: 15px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: relative;
             z-index: 10;
         }
-        
+
         #header h1 {
             font-size: 20px;
             font-weight: 600;
         }
-        
+
         #header p {
             font-size: 13px;
             opacity: 0.9;
             margin-top: 4px;
         }
-        
+
         #controls {
             padding: 15px 20px;
             background: white;
@@ -49,7 +50,7 @@
             position: relative;
             z-index: 10;
         }
-        
+
         #search {
             width: 100%;
             max-width: 400px;
@@ -58,19 +59,19 @@
             border-radius: 4px;
             font-size: 14px;
         }
-        
+
         #search:focus {
             outline: none;
             border-color: #4A90E2;
         }
-        
+
         #container {
             width: 100vw;
             height: calc(100vh - 120px);
             background: white;
             position: relative;
         }
-        
+
         #loading {
             position: absolute;
             top: 50%;
@@ -81,7 +82,7 @@
             z-index: 5;
             text-align: center;
         }
-        
+
         #legend {
             position: absolute;
             bottom: 20px;
@@ -89,61 +90,115 @@
             background: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             font-size: 13px;
             z-index: 5;
         }
-        
+
         #legend h3 {
             margin: 0 0 10px 0;
             font-size: 14px;
             font-weight: 600;
             color: #2c3e50;
         }
-        
+
         .legend-item {
             display: flex;
             align-items: center;
             margin: 6px 0;
         }
-        
+
         .legend-color {
             width: 16px;
             height: 16px;
             border-radius: 50%;
             margin-right: 8px;
         }
-        
+
+        /* Tooltip styles */
+        #tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            line-height: 1.4;
+        }
+
+        #tooltip .tooltip-label {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        #tooltip .tooltip-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #tooltip .tooltip-type.reading {
+            color: #74b9ff;
+        }
+
+        #tooltip .tooltip-type.hashtag {
+            color: #ffeaa7;
+        }
+
+        #tooltip .tooltip-stats {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        #tooltip .tooltip-stats span {
+            display: block;
+            margin: 2px 0;
+        }
+
         @media (max-width: 600px) {
             #header h1 {
                 font-size: 18px;
             }
+
             #header p {
                 font-size: 12px;
             }
+
             #legend {
                 bottom: 10px;
                 right: 10px;
                 font-size: 12px;
             }
+
+            #tooltip {
+                font-size: 12px;
+                max-width: 220px;
+            }
         }
     </style>
 </head>
+
 <body>
     <div id="header">
         <h1>ENGL1190M Folksonomy Network</h1>
         <p>Explore connections between course readings and student-generated hashtags</p>
     </div>
-    
+
     <div id="controls">
-        <input 
-            type="text" 
-            id="search" 
-            placeholder="Search for readings or hashtags..."
-            autocomplete="off"
-        />
+        <input type="text" id="search" placeholder="Search for readings or hashtags..." autocomplete="off" />
     </div>
-    
+
     <div id="container">
         <div id="loading">Loading network data...</div>
         <div id="legend" style="display: none;">
@@ -161,22 +216,23 @@
                 Click and drag to pan • Scroll to zoom
             </div>
         </div>
+        <div id="tooltip"></div>
     </div>
 
     <script>
         console.log('=== Script starting ===');
         console.log('Graphology available?', typeof graphology !== 'undefined');
         console.log('Sigma available?', typeof Sigma !== 'undefined');
-        
+
         // State
         let graph;
         let renderer;
         let hoveredNode = null;
-        
+
         // Initialize
         async function init() {
             console.log('=== Init function starting ===');
-            
+
             try {
                 // Verify libraries
                 if (typeof graphology === 'undefined') {
@@ -185,44 +241,43 @@
                 if (typeof Sigma === 'undefined') {
                     throw new Error('Sigma library not loaded');
                 }
-                
+
                 console.log('✓ Libraries verified');
-                
+
                 // Fetch graph data
                 console.log('Fetching graph.json...');
                 const response = await fetch(`graph.json?t=${Date.now()}`);
-                
+
                 if (!response.ok) {
                     throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
-                
+
                 // Remove loading, show legend
                 document.getElementById('loading').remove();
                 document.getElementById('legend').style.display = 'block';
-                
+
                 // Create graph
                 console.log('Creating graph...');
                 graph = new graphology.Graph();
-                
+
                 // Separate nodes by type for layout
                 const readingNodes = data.nodes.filter(n => n.type === 'reading');
                 const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
-                
+
                 const centerX = 500;
                 const centerY = 400;
                 const innerRadius = 150;
                 const outerRadius = 350;
-                
+
                 // Add reading nodes (inner circle)
                 readingNodes.forEach((node, i) => {
                     const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
                     graph.addNode(node.id, {
                         label: node.label,
-                        // DON'T pass type to graph - let Sigma use defaultNodeType
-                        nodeType: node.type,  // Store for reference but not used by Sigma
+                        nodeType: node.type,
                         size: node.size || 10,
                         color: node.color,
                         x: centerX + innerRadius * Math.cos(angle),
@@ -230,14 +285,13 @@
                         count: node.count || 0
                     });
                 });
-                
+
                 // Add hashtag nodes (outer circle)
                 hashtagNodes.forEach((node, i) => {
                     const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
                     graph.addNode(node.id, {
                         label: node.label,
-                        // DON'T pass type to graph - let Sigma use defaultNodeType
-                        nodeType: node.type,  // Store for reference but not used by Sigma
+                        nodeType: node.type,
                         size: node.size || 10,
                         color: node.color,
                         x: centerX + outerRadius * Math.cos(angle),
@@ -245,9 +299,9 @@
                         count: node.count || 0
                     });
                 });
-                
+
                 console.log(`✓ Added ${graph.order} nodes`);
-                
+
                 // Add edges
                 data.edges.forEach(edge => {
                     if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
@@ -258,9 +312,9 @@
                         });
                     }
                 });
-                
+
                 console.log(`✓ Added ${graph.size} edges`);
-                
+
                 // Create Sigma renderer
                 console.log('Creating Sigma renderer...');
                 const container = document.getElementById('container');
@@ -270,24 +324,23 @@
                     labelWeight: '600',
                     minCameraRatio: 0.1,
                     maxCameraRatio: 10,
-                    // Use default rendering for all node types
                     defaultNodeType: 'circle',
                     defaultEdgeType: 'line'
                 });
-                
+
                 console.log('✓ Renderer created');
-                
+
                 // Setup interactions
                 setupInteractions();
-                
+
                 console.log('=== SUCCESS: Network rendered ===');
-                
+
             } catch (error) {
                 console.error('=== ERROR ===', error);
-                
+
                 const loadingEl = document.getElementById('loading');
                 if (loadingEl) {
-                    loadingEl.innerHTML = 
+                    loadingEl.innerHTML =
                         `<span style="color: #e74c3c;">
                             <strong>Error:</strong> ${error.message}<br><br>
                             <small>Check browser console (F12) for details</small>
@@ -295,19 +348,125 @@
                 }
             }
         }
-        
+
         function setupInteractions() {
             console.log('Setting up interactions...');
-            
+
+            const tooltip = document.getElementById('tooltip');
+
+            // Helper function to get connection info for a node
+            function getConnectionInfo(nodeId) {
+                const neighbors = graph.neighbors(nodeId);
+                const nodeAttrs = graph.getNodeAttributes(nodeId);
+                const isReading = nodeAttrs.nodeType === 'reading';
+
+                let connectedReadings = 0;
+                let connectedHashtags = 0;
+
+                neighbors.forEach(neighborId => {
+                    const neighborAttrs = graph.getNodeAttributes(neighborId);
+                    if (neighborAttrs.nodeType === 'reading') {
+                        connectedReadings++;
+                    } else {
+                        connectedHashtags++;
+                    }
+                });
+
+                return {
+                    isReading,
+                    connectedReadings,
+                    connectedHashtags,
+                    totalConnections: neighbors.length
+                };
+            }
+
+            // Helper function to show tooltip
+            function showTooltip(nodeId, mouseX, mouseY) {
+                const attrs = graph.getNodeAttributes(nodeId);
+                const info = getConnectionInfo(nodeId);
+
+                let statsHtml = '';
+                if (info.isReading) {
+                    statsHtml = `
+                        <div class="tooltip-stats">
+                            <span>Connected to <strong>${info.connectedHashtags}</strong> hashtag${info.connectedHashtags !== 1 ? 's' : ''}</span>
+                        </div>
+                    `;
+                } else {
+                    const usageText = attrs.count > 0
+                        ? `Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
+                        : '';
+                    statsHtml = `
+                        <div class="tooltip-stats">
+                            <span>Connected to <strong>${info.connectedReadings}</strong> reading${info.connectedReadings !== 1 ? 's' : ''}</span>
+                            ${usageText ? `<span>${usageText}</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                tooltip.innerHTML = `
+                    <div class="tooltip-label">${attrs.label}</div>
+                    <div class="tooltip-type ${attrs.nodeType}">${attrs.nodeType}</div>
+                    ${statsHtml}
+                `;
+
+                // Position tooltip
+                const containerRect = document.getElementById('container').getBoundingClientRect();
+                let left = mouseX - containerRect.left + 15;
+                let top = mouseY - containerRect.top + 15;
+
+                // Keep tooltip in viewport
+                const tooltipRect = tooltip.getBoundingClientRect();
+                if (left + 280 > containerRect.width) {
+                    left = mouseX - containerRect.left - 295;
+                }
+                if (top + 100 > containerRect.height) {
+                    top = mouseY - containerRect.top - 115;
+                }
+
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+                tooltip.style.display = 'block';
+            }
+
+            // Hide tooltip
+            function hideTooltip() {
+                tooltip.style.display = 'none';
+            }
+
+            // Track mouse position for tooltip
+            let mouseX = 0, mouseY = 0;
+            document.getElementById('container').addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // Update tooltip position if visible
+                if (hoveredNode && tooltip.style.display === 'block') {
+                    const containerRect = document.getElementById('container').getBoundingClientRect();
+                    let left = mouseX - containerRect.left + 15;
+                    let top = mouseY - containerRect.top + 15;
+
+                    if (left + 280 > containerRect.width) {
+                        left = mouseX - containerRect.left - 295;
+                    }
+                    if (top + 100 > containerRect.height) {
+                        top = mouseY - containerRect.top - 115;
+                    }
+
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${top}px`;
+                }
+            });
+
             // Hover to highlight
             renderer.on('enterNode', ({ node }) => {
                 hoveredNode = node;
                 const neighbors = new Set(graph.neighbors(node));
-                
+
                 graph.forEachNode((n) => {
                     graph.setNodeAttribute(n, 'highlighted', n === node || neighbors.has(n));
                 });
-                
+
                 graph.forEachEdge((edge, attrs, source, target) => {
                     if (source === node || target === node) {
                         graph.setEdgeAttribute(edge, 'color', '#333');
@@ -316,29 +475,35 @@
                         graph.setEdgeAttribute(edge, 'color', '#eee');
                     }
                 });
-                
+
                 renderer.refresh();
+
+                // Show tooltip
+                showTooltip(node, mouseX, mouseY);
             });
-            
+
             renderer.on('leaveNode', () => {
                 hoveredNode = null;
-                
+
                 graph.forEachNode((n) => {
                     graph.setNodeAttribute(n, 'highlighted', true);
                 });
-                
+
                 graph.forEachEdge((edge, attrs) => {
                     graph.setEdgeAttribute(edge, 'color', '#ccc');
                     graph.setEdgeAttribute(edge, 'size', Math.max(1, (attrs.weight || 1) * 0.5));
                 });
-                
+
                 renderer.refresh();
+
+                // Hide tooltip
+                hideTooltip();
             });
-            
+
             // Search filter
             document.getElementById('search').addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
-                
+
                 graph.forEachNode((node, attrs) => {
                     if (!query) {
                         graph.setNodeAttribute(node, 'hidden', false);
@@ -347,29 +512,29 @@
                         graph.setNodeAttribute(node, 'hidden', !label.includes(query));
                     }
                 });
-                
+
                 renderer.refresh();
             });
-            
+
             // Visual reducer for hover effect
             renderer.setSetting('nodeReducer', (node, data) => {
                 const res = { ...data };
-                
+
                 if (hoveredNode && !data.highlighted) {
                     res.color = '#ddd';
                     res.size = data.size * 0.7;
                 }
-                
+
                 if (data.hidden) {
                     res.hidden = true;
                 }
-                
+
                 return res;
             });
-            
+
             console.log('✓ Interactions ready');
         }
-        
+
         // Start when page loads
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
@@ -378,4 +543,5 @@
         }
     </script>
 </body>
+
 </html>
