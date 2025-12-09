@@ -507,57 +507,57 @@
         </div>
     </div>
 
-    <script>
-        console.log('=== Script starting ===');
-        console.log('Graphology available?', typeof graphology !== 'undefined');
-        console.log('Sigma available?', typeof Sigma !== 'undefined');
-        console.log('ForceAtlas2 available?', typeof ForceAtlas2 !== 'undefined');
+<script>
+    console.log('=== Script starting ===');
+    console.log('Graphology available?', typeof graphology !== 'undefined');
+    console.log('Sigma available?', typeof Sigma !== 'undefined');
+    console.log('ForceAtlas2 available?', typeof ForceAtlas2 !== 'undefined');
 
-        // Global variable to store loaded graph data for download functionality
-        let loadedGraphData = null;
+    // Global variable to store loaded graph data for download functionality
+    let loadedGraphData = null;
 
-        // Refined color palette - MORE VISIBLE EDGES
-        const COLORS = {
-            reading: '#3d8fd1',      // Refined teal-blue
-            hashtag: '#e8a838',      // Warm amber
-            edge: '#9aa5b1',         // Solid gray - much more visible
-            edgeHighlight: '#1e3a5f',
-            edgeDim: 'rgba(200, 200, 200, 0.25)',
-            nodeDim: '#d0d0d0'
-        };
+    // Refined color palette - MORE VISIBLE EDGES
+    const COLORS = {
+        reading: '#3d8fd1',      // Refined teal-blue
+        hashtag: '#e8a838',      // Warm amber
+        edge: '#9aa5b1',         // Solid gray - much more visible
+        edgeHighlight: '#1e3a5f',
+        edgeDim: 'rgba(200, 200, 200, 0.25)',
+        nodeDim: '#d0d0d0'
+    };
 
-        // State
-        let graph;
-        let renderer;
-        let hoveredNode = null;
-        let selectedNode = null;
+    // State
+    let graph;
+    let renderer;
+    let hoveredNode = null;
+    let selectedNode = null;
 
-        // Download functionality
-        function downloadArchive() {
-                if (!loadedGraphData) {
-                    alert('No graph data available to download. Please wait for the graph to load.');
-                    return;
-                }
+    // Download functionality
+    function downloadArchive() {
+        if (!loadedGraphData) {
+            alert('No graph data available to download. Please wait for the graph to load.');
+            return;
+        }
 
-                // Get current date for filename
-                const now = new Date();
-                const dateStr = now.toISOString().split('T')[0];
-                const filename = `folksonomy_archive_${dateStr}.html`;
+        // Get current date for filename
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const filename = `folksonomy_archive_${dateStr}.html`;
 
-                // Clone the HTML but inject embedded data
-                const htmlDoc = document.documentElement.cloneNode(true);
+        // Clone the HTML but inject embedded data
+        const htmlDoc = document.documentElement.cloneNode(true);
 
-                // Find the script tag and modify it
-                const scripts = htmlDoc.getElementsByTagName('script');
-                const mainScript = scripts[scripts.length - 1]; // Get the last script (our main script)
+        // Find the script tag and modify it
+        const scripts = htmlDoc.getElementsByTagName('script');
+        const mainScript = scripts[scripts.length - 1]; // Get the last script (our main script)
 
-                // Replace the fetch section with embedded data
-                let scriptContent = mainScript.textContent;
+        // Replace the fetch section with embedded data
+        let scriptContent = mainScript.textContent;
 
-                // Replace the entire fetch/response block
-                scriptContent = scriptContent.replace(
-                    /console\.log\('Fetching graph\.json\.\.\.'\);[\s\S]*?const data = await response\.json\(\);[\s\S]*?loadedGraphData = data;[\s\S]*?console\.log\('✓ Data loaded:',[\s\S]*?\);/,
-                    `console.log('Loading embedded graph data...');
+        // Replace the entire fetch/response block
+        scriptContent = scriptContent.replace(
+            /console\.log\('Fetching graph\.json\.\.\.'\);[\s\S]*?const data = await response\.json\(\);[\s\S]*?loadedGraphData = data;[\s\S]*?console\.log\('✓ Data loaded:',[\s\S]*?\);/,
+            `console.log('Loading embedded graph data...');
                 
                 // Embedded graph data (generated ${now.toISOString()})
                 const data = ${JSON.stringify(loadedGraphData, null, 2)};
@@ -566,108 +566,427 @@
                 loadedGraphData = data;
                 
                 console.log('✓ Embedded data loaded:', \`\${data.nodes.length} nodes, \${data.edges.length} edges\`);`
-                );
+        );
 
-                mainScript.textContent = scriptContent;
+        mainScript.textContent = scriptContent;
 
-                // Serialize the modified HTML
-                const serializer = new XMLSerializer();
-                const htmlContent = serializer.serializeToString(htmlDoc);
+        // Serialize the modified HTML
+        const serializer = new XMLSerializer();
+        const htmlContent = serializer.serializeToString(htmlDoc);
 
-                // Create blob and download
-                const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+        // Create blob and download
+        const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-                console.log(`✓ Downloaded archive: ${filename}`);
+        console.log(`✓ Downloaded archive: ${filename}`);
     }
 
-        function setupInteractions() {
-            console.log('Setting up interactions...');
+    // Attach download handler
+    document.getElementById('download-btn').addEventListener('click', downloadArchive);
 
-            const tooltip = document.getElementById('tooltip');
-            const detailPanel = document.getElementById('detail-panel');
-            const panelClose = detailPanel.querySelector('.panel-close');
-            const panelTitle = detailPanel.querySelector('.panel-title');
-            const panelType = detailPanel.querySelector('.panel-type');
-            const panelContent = detailPanel.querySelector('.panel-content');
+    // Initialize
+    async function init() {
+        console.log('=== Init function starting ===');
 
-            // Helper function to get connection info for a node
-            function getConnectionInfo(nodeId) {
-                const neighbors = graph.neighbors(nodeId);
-                const nodeAttrs = graph.getNodeAttributes(nodeId);
-                const isReading = nodeAttrs.nodeType === 'reading';
-
-                let connectedReadings = [];
-                let connectedHashtags = [];
-
-                neighbors.forEach(neighborId => {
-                    const neighborAttrs = graph.getNodeAttributes(neighborId);
-                    const edge = graph.edge(nodeId, neighborId);
-                    const weight = edge ? graph.getEdgeAttribute(edge, 'weight') : 1;
-
-                    const connectionInfo = {
-                        id: neighborId,
-                        label: neighborAttrs.label,
-                        type: neighborAttrs.nodeType,
-                        weight: weight
-                    };
-
-                    if (neighborAttrs.nodeType === 'reading') {
-                        connectedReadings.push(connectionInfo);
-                    } else {
-                        connectedHashtags.push(connectionInfo);
-                    }
-                });
-
-                connectedReadings.sort((a, b) => b.weight - a.weight);
-                connectedHashtags.sort((a, b) => b.weight - a.weight);
-
-                return {
-                    isReading,
-                    connectedReadings,
-                    connectedHashtags,
-                    totalConnections: neighbors.length
-                };
+        try {
+            // Verify libraries
+            if (typeof graphology === 'undefined') {
+                throw new Error('Graphology library not loaded');
+            }
+            if (typeof Sigma === 'undefined') {
+                throw new Error('Sigma library not loaded');
             }
 
-            // Helper function to show tooltip with transition
-            function showTooltip(nodeId, mouseX, mouseY) {
-                const attrs = graph.getNodeAttributes(nodeId);
-                const info = getConnectionInfo(nodeId);
+            console.log('✓ Libraries verified');
 
-                let statsHtml = '';
-                if (info.isReading) {
-                    statsHtml = `
-                        <div class="tooltip-stats">
-                            <span>Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}</span>
-                        </div>
-                    `;
-                } else {
-                    const usageText = attrs.count > 0
-                        ? `Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
-                        : '';
-                    statsHtml = `
-                        <div class="tooltip-stats">
-                            <span>Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}</span>
-                            ${usageText ? `<span>${usageText}</span>` : ''}
-                        </div>
-                    `;
+            // Fetch graph data
+            console.log('Fetching graph.json...');
+            const response = await fetch(`graph.json?t=${Date.now()}`);
+
+            if (!response.ok) {
+                throw new Error(`Failed to load graph.json: HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Store for download functionality
+            loadedGraphData = data;
+
+            console.log('✓ Data loaded:', `${data.nodes.length} nodes, ${data.edges.length} edges`);
+
+            // Apply refined colors to data
+            data.nodes.forEach(node => {
+                node.color = node.type === 'reading' ? COLORS.reading : COLORS.hashtag;
+            });
+
+            // Remove loading, show legend
+            document.getElementById('loading').remove();
+            document.getElementById('legend').style.display = 'block';
+
+            // Create graph
+            console.log('Creating graph...');
+            graph = new graphology.Graph();
+
+            // Add all nodes with random initial positions (for force layout)
+            data.nodes.forEach((node) => {
+                graph.addNode(node.id, {
+                    label: node.label,
+                    nodeType: node.type,
+                    size: node.size || 10,
+                    color: node.color,
+                    x: Math.random() * 100,
+                    y: Math.random() * 100,
+                    count: node.count || 0
+                });
+            });
+
+            console.log(`✓ Added ${graph.order} nodes`);
+
+            // Add edges
+            data.edges.forEach((edge) => {
+                if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
+                    graph.addEdge(edge.source, edge.target, {
+                        weight: edge.weight || 1,
+                        size: Math.max(1.5, (edge.weight || 1) * 0.8),  // Thicker edges
+                        color: COLORS.edge
+                    });
                 }
+            });
 
-                tooltip.innerHTML = `
-                    <div class="tooltip-label">${attrs.label}</div>
-                    <div class="tooltip-type ${attrs.nodeType}">${attrs.nodeType}</div>
-                    ${statsHtml}
-                    <div class="tooltip-hint">Click to see all connections</div>
+            console.log(`✓ Added ${graph.size} edges`);
+
+            // Apply Force Atlas 2 layout
+            console.log('Applying force-directed layout...');
+
+            if (typeof ForceAtlas2 !== 'undefined') {
+                // Run ForceAtlas2 synchronously for a set number of iterations
+                ForceAtlas2.assign(graph, {
+                    iterations: 100,
+                    settings: {
+                        gravity: 1,
+                        scalingRatio: 10,
+                        strongGravityMode: true,
+                        slowDown: 5,
+                        barnesHutOptimize: graph.order > 100,
+                        barnesHutTheta: 0.5,
+                        adjustSizes: true,
+                        linLogMode: false,
+                        outboundAttractionDistribution: false
+                    }
+                });
+                console.log('✓ Force-directed layout applied');
+            } else {
+                console.warn('ForceAtlas2 not available, using fallback circular layout');
+                // Fallback to circular layout
+                const readingNodes = data.nodes.filter(n => n.type === 'reading');
+                const hashtagNodes = data.nodes.filter(n => n.type === 'hashtag');
+
+                const centerX = 50;
+                const centerY = 50;
+                const innerRadius = 15;
+                const outerRadius = 40;
+
+                readingNodes.forEach((node, i) => {
+                    const angle = (2 * Math.PI * i) / readingNodes.length - Math.PI / 2;
+                    graph.setNodeAttribute(node.id, 'x', centerX + innerRadius * Math.cos(angle));
+                    graph.setNodeAttribute(node.id, 'y', centerY + innerRadius * Math.sin(angle));
+                });
+
+                hashtagNodes.forEach((node, i) => {
+                    const angle = (2 * Math.PI * i) / hashtagNodes.length - Math.PI / 2;
+                    graph.setNodeAttribute(node.id, 'x', centerX + outerRadius * Math.cos(angle));
+                    graph.setNodeAttribute(node.id, 'y', centerY + outerRadius * Math.sin(angle));
+                });
+            }
+
+            // Create Sigma renderer
+            console.log('Creating Sigma renderer...');
+            const container = document.getElementById('container');
+            renderer = new Sigma(graph, container, {
+                renderEdgeLabels: false,
+                labelSize: 13,
+                labelWeight: '500',
+                labelFont: 'Inter, sans-serif',
+                labelColor: { color: '#1e3a5f' },
+                minCameraRatio: 0.1,
+                maxCameraRatio: 10,
+                defaultNodeType: 'circle',
+                defaultEdgeType: 'line',
+                edgeLabelSize: 12,
+                labelDensity: 0.07,
+                labelGridCellSize: 60,
+                labelRenderedSizeThreshold: 6
+            });
+
+            console.log('✓ Renderer created');
+
+            // Setup interactions
+            setupInteractions();
+
+            console.log('=== SUCCESS: Network rendered ===');
+
+        } catch (error) {
+            console.error('=== ERROR ===', error);
+
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+                loadingEl.innerHTML =
+                    `<span style="color: #e74c3c;">
+                        <strong>Error:</strong> ${error.message}<br><br>
+                        <small>Check browser console (F12) for details</small>
+                    </span>`;
+            }
+        }
+    }
+
+    function setupInteractions() {
+        console.log('Setting up interactions...');
+
+        const tooltip = document.getElementById('tooltip');
+        const detailPanel = document.getElementById('detail-panel');
+        const panelClose = detailPanel.querySelector('.panel-close');
+        const panelTitle = detailPanel.querySelector('.panel-title');
+        const panelType = detailPanel.querySelector('.panel-type');
+        const panelContent = detailPanel.querySelector('.panel-content');
+
+        // Helper function to get connection info for a node
+        function getConnectionInfo(nodeId) {
+            const neighbors = graph.neighbors(nodeId);
+            const nodeAttrs = graph.getNodeAttributes(nodeId);
+            const isReading = nodeAttrs.nodeType === 'reading';
+
+            let connectedReadings = [];
+            let connectedHashtags = [];
+
+            neighbors.forEach(neighborId => {
+                const neighborAttrs = graph.getNodeAttributes(neighborId);
+                const edge = graph.edge(nodeId, neighborId);
+                const weight = edge ? graph.getEdgeAttribute(edge, 'weight') : 1;
+
+                const connectionInfo = {
+                    id: neighborId,
+                    label: neighborAttrs.label,
+                    type: neighborAttrs.nodeType,
+                    weight: weight
+                };
+
+                if (neighborAttrs.nodeType === 'reading') {
+                    connectedReadings.push(connectionInfo);
+                } else {
+                    connectedHashtags.push(connectionInfo);
+                }
+            });
+
+            connectedReadings.sort((a, b) => b.weight - a.weight);
+            connectedHashtags.sort((a, b) => b.weight - a.weight);
+
+            return {
+                isReading,
+                connectedReadings,
+                connectedHashtags,
+                totalConnections: neighbors.length
+            };
+        }
+
+        // Helper function to show tooltip with transition
+        function showTooltip(nodeId, mouseX, mouseY) {
+            const attrs = graph.getNodeAttributes(nodeId);
+            const info = getConnectionInfo(nodeId);
+
+            let statsHtml = '';
+            if (info.isReading) {
+                statsHtml = `
+                    <div class="tooltip-stats">
+                        <span>Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}</span>
+                    </div>
                 `;
+            } else {
+                const usageText = attrs.count > 0
+                    ? `Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
+                    : '';
+                statsHtml = `
+                    <div class="tooltip-stats">
+                        <span>Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}</span>
+                        ${usageText ? `<span>${usageText}</span>` : ''}
+                    </div>
+                `;
+            }
 
+            tooltip.innerHTML = `
+                <div class="tooltip-label">${attrs.label}</div>
+                <div class="tooltip-type ${attrs.nodeType}">${attrs.nodeType}</div>
+                ${statsHtml}
+                <div class="tooltip-hint">Click to see all connections</div>
+            `;
+
+            const containerRect = document.getElementById('container').getBoundingClientRect();
+            let left = mouseX - containerRect.left + 15;
+            let top = mouseY - containerRect.top + 15;
+
+            if (left + 280 > containerRect.width) {
+                left = mouseX - containerRect.left - 295;
+            }
+            if (top + 100 > containerRect.height) {
+                top = mouseY - containerRect.top - 115;
+            }
+
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            tooltip.style.display = 'block';
+
+            requestAnimationFrame(() => {
+                tooltip.classList.add('visible');
+            });
+        }
+
+        // Hide tooltip with transition
+        function hideTooltip() {
+            tooltip.classList.remove('visible');
+            setTimeout(() => {
+                if (!tooltip.classList.contains('visible')) {
+                    tooltip.style.display = 'none';
+                }
+            }, 150);
+        }
+
+        // Show detail panel
+        function showDetailPanel(nodeId) {
+            const attrs = graph.getNodeAttributes(nodeId);
+            const info = getConnectionInfo(nodeId);
+
+            panelTitle.textContent = attrs.label;
+            panelType.textContent = attrs.nodeType;
+            panelType.className = `panel-type ${attrs.nodeType}`;
+
+            let contentHtml = '';
+
+            if (info.isReading) {
+                contentHtml += `
+                    <div class="panel-stats">
+                        Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}
+                    </div>
+                `;
+            } else {
+                const usageText = attrs.count > 0
+                    ? ` • Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
+                    : '';
+                contentHtml += `
+                    <div class="panel-stats">
+                        Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}${usageText}
+                    </div>
+                `;
+            }
+
+            if (info.isReading && info.connectedHashtags.length > 0) {
+                contentHtml += `
+                    <div class="panel-section-title">Connected Hashtags</div>
+                    <ul class="panel-list">
+                        ${info.connectedHashtags.map(node => `
+                            <li>
+                                <span class="node-dot hashtag"></span>
+                                <span class="node-label">${node.label}</span>
+                                ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+            } else if (!info.isReading && info.connectedReadings.length > 0) {
+                contentHtml += `
+                    <div class="panel-section-title">Connected Readings</div>
+                    <ul class="panel-list">
+                        ${info.connectedReadings.map(node => `
+                            <li>
+                                <span class="node-dot reading"></span>
+                                <span class="node-label">${node.label}</span>
+                                ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+            }
+
+            panelContent.innerHTML = contentHtml;
+            detailPanel.style.display = 'flex';
+            selectedNode = nodeId;
+
+            updateHighlighting();
+        }
+
+        // Hide detail panel
+        function hideDetailPanel() {
+            detailPanel.style.display = 'none';
+            selectedNode = null;
+
+            if (!hoveredNode) {
+                resetHighlighting();
+            }
+        }
+
+        // Update highlighting based on hovered or selected node
+        function updateHighlighting() {
+            const activeNode = hoveredNode || selectedNode;
+
+            if (!activeNode) {
+                resetHighlighting();
+                return;
+            }
+
+            const neighbors = new Set(graph.neighbors(activeNode));
+
+            graph.forEachNode((n) => {
+                graph.setNodeAttribute(n, 'highlighted', n === activeNode || neighbors.has(n));
+            });
+
+            graph.forEachEdge((edge, attrs, source, target) => {
+                if (source === activeNode || target === activeNode) {
+                    graph.setEdgeAttribute(edge, 'color', COLORS.edgeHighlight);
+                    graph.setEdgeAttribute(edge, 'size', Math.max(2, (attrs.weight || 1) * 1.2));
+                } else {
+                    graph.setEdgeAttribute(edge, 'color', COLORS.edgeDim);
+                }
+            });
+
+            renderer.refresh();
+        }
+
+        // Reset highlighting
+        function resetHighlighting() {
+            graph.forEachNode((n) => {
+                graph.setNodeAttribute(n, 'highlighted', true);
+            });
+
+            graph.forEachEdge((edge, attrs) => {
+                graph.setEdgeAttribute(edge, 'color', COLORS.edge);
+                graph.setEdgeAttribute(edge, 'size', Math.max(1.5, (attrs.weight || 1) * 0.8));
+            });
+
+            renderer.refresh();
+        }
+
+        // Close panel button
+        panelClose.addEventListener('click', () => {
+            hideDetailPanel();
+        });
+
+        // Close panel when clicking on canvas (not on a node)
+        renderer.on('clickStage', () => {
+            hideDetailPanel();
+        });
+
+        // Track mouse position for tooltip
+        let mouseX = 0, mouseY = 0;
+        document.getElementById('container').addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            if (hoveredNode && tooltip.style.display === 'block') {
                 const containerRect = document.getElementById('container').getBoundingClientRect();
                 let left = mouseX - containerRect.left + 15;
                 let top = mouseY - containerRect.top + 15;
@@ -681,237 +1000,75 @@
 
                 tooltip.style.left = `${left}px`;
                 tooltip.style.top = `${top}px`;
-                tooltip.style.display = 'block';
-
-                requestAnimationFrame(() => {
-                    tooltip.classList.add('visible');
-                });
             }
+        });
 
-            // Hide tooltip with transition
-            function hideTooltip() {
-                tooltip.classList.remove('visible');
-                setTimeout(() => {
-                    if (!tooltip.classList.contains('visible')) {
-                        tooltip.style.display = 'none';
-                    }
-                }, 150);
-            }
+        // Hover to highlight and show tooltip
+        renderer.on('enterNode', ({ node }) => {
+            hoveredNode = node;
+            updateHighlighting();
+            showTooltip(node, mouseX, mouseY);
+        });
 
-            // Show detail panel
-            function showDetailPanel(nodeId) {
-                const attrs = graph.getNodeAttributes(nodeId);
-                const info = getConnectionInfo(nodeId);
+        renderer.on('leaveNode', () => {
+            hoveredNode = null;
+            hideTooltip();
 
-                panelTitle.textContent = attrs.label;
-                panelType.textContent = attrs.nodeType;
-                panelType.className = `panel-type ${attrs.nodeType}`;
-
-                let contentHtml = '';
-
-                if (info.isReading) {
-                    contentHtml += `
-                        <div class="panel-stats">
-                            Connected to <strong>${info.connectedHashtags.length}</strong> hashtag${info.connectedHashtags.length !== 1 ? 's' : ''}
-                        </div>
-                    `;
-                } else {
-                    const usageText = attrs.count > 0
-                        ? ` • Used <strong>${attrs.count}</strong> time${attrs.count !== 1 ? 's' : ''}`
-                        : '';
-                    contentHtml += `
-                        <div class="panel-stats">
-                            Connected to <strong>${info.connectedReadings.length}</strong> reading${info.connectedReadings.length !== 1 ? 's' : ''}${usageText}
-                        </div>
-                    `;
-                }
-
-                if (info.isReading && info.connectedHashtags.length > 0) {
-                    contentHtml += `
-                        <div class="panel-section-title">Connected Hashtags</div>
-                        <ul class="panel-list">
-                            ${info.connectedHashtags.map(node => `
-                                <li>
-                                    <span class="node-dot hashtag"></span>
-                                    <span class="node-label">${node.label}</span>
-                                    ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
-                                </li>
-                            `).join('')}
-                        </ul>
-                    `;
-                } else if (!info.isReading && info.connectedReadings.length > 0) {
-                    contentHtml += `
-                        <div class="panel-section-title">Connected Readings</div>
-                        <ul class="panel-list">
-                            ${info.connectedReadings.map(node => `
-                                <li>
-                                    <span class="node-dot reading"></span>
-                                    <span class="node-label">${node.label}</span>
-                                    ${node.weight > 1 ? `<span class="node-weight">×${node.weight}</span>` : ''}
-                                </li>
-                            `).join('')}
-                        </ul>
-                    `;
-                }
-
-                panelContent.innerHTML = contentHtml;
-                detailPanel.style.display = 'flex';
-                selectedNode = nodeId;
-
+            if (selectedNode) {
                 updateHighlighting();
+            } else {
+                resetHighlighting();
             }
+        });
 
-            // Hide detail panel
-            function hideDetailPanel() {
-                detailPanel.style.display = 'none';
-                selectedNode = null;
+        // Click to show detail panel
+        renderer.on('clickNode', ({ node }) => {
+            showDetailPanel(node);
+            hideTooltip();
+        });
 
-                if (!hoveredNode) {
-                    resetHighlighting();
-                }
-            }
+        // Search filter
+        document.getElementById('search').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
 
-            // Update highlighting based on hovered or selected node
-            function updateHighlighting() {
-                const activeNode = hoveredNode || selectedNode;
-
-                if (!activeNode) {
-                    resetHighlighting();
-                    return;
-                }
-
-                const neighbors = new Set(graph.neighbors(activeNode));
-
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', n === activeNode || neighbors.has(n));
-                });
-
-                graph.forEachEdge((edge, attrs, source, target) => {
-                    if (source === activeNode || target === activeNode) {
-                        graph.setEdgeAttribute(edge, 'color', COLORS.edgeHighlight);
-                        graph.setEdgeAttribute(edge, 'size', Math.max(2, (attrs.weight || 1) * 1.2));
-                    } else {
-                        graph.setEdgeAttribute(edge, 'color', COLORS.edgeDim);
-                    }
-                });
-
-                renderer.refresh();
-            }
-
-            // Reset highlighting
-            function resetHighlighting() {
-                graph.forEachNode((n) => {
-                    graph.setNodeAttribute(n, 'highlighted', true);
-                });
-
-                graph.forEachEdge((edge, attrs) => {
-                    graph.setEdgeAttribute(edge, 'color', COLORS.edge);
-                    graph.setEdgeAttribute(edge, 'size', Math.max(1.5, (attrs.weight || 1) * 0.8));
-                });
-
-                renderer.refresh();
-            }
-
-            // Close panel button
-            panelClose.addEventListener('click', () => {
-                hideDetailPanel();
-            });
-
-            // Close panel when clicking on canvas (not on a node)
-            renderer.on('clickStage', () => {
-                hideDetailPanel();
-            });
-
-            // Track mouse position for tooltip
-            let mouseX = 0, mouseY = 0;
-            document.getElementById('container').addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-
-                if (hoveredNode && tooltip.style.display === 'block') {
-                    const containerRect = document.getElementById('container').getBoundingClientRect();
-                    let left = mouseX - containerRect.left + 15;
-                    let top = mouseY - containerRect.top + 15;
-
-                    if (left + 280 > containerRect.width) {
-                        left = mouseX - containerRect.left - 295;
-                    }
-                    if (top + 100 > containerRect.height) {
-                        top = mouseY - containerRect.top - 115;
-                    }
-
-                    tooltip.style.left = `${left}px`;
-                    tooltip.style.top = `${top}px`;
-                }
-            });
-
-            // Hover to highlight and show tooltip
-            renderer.on('enterNode', ({ node }) => {
-                hoveredNode = node;
-                updateHighlighting();
-                showTooltip(node, mouseX, mouseY);
-            });
-
-            renderer.on('leaveNode', () => {
-                hoveredNode = null;
-                hideTooltip();
-
-                if (selectedNode) {
-                    updateHighlighting();
+            graph.forEachNode((node, attrs) => {
+                if (!query) {
+                    graph.setNodeAttribute(node, 'hidden', false);
                 } else {
-                    resetHighlighting();
+                    const label = attrs.label.toLowerCase();
+                    graph.setNodeAttribute(node, 'hidden', !label.includes(query));
                 }
             });
 
-            // Click to show detail panel
-            renderer.on('clickNode', ({ node }) => {
-                showDetailPanel(node);
-                hideTooltip();
-            });
+            renderer.refresh();
+        });
 
-            // Search filter
-            document.getElementById('search').addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase().trim();
+        // Visual reducer for hover/selection effect
+        renderer.setSetting('nodeReducer', (node, data) => {
+            const res = { ...data };
+            const activeNode = hoveredNode || selectedNode;
 
-                graph.forEachNode((node, attrs) => {
-                    if (!query) {
-                        graph.setNodeAttribute(node, 'hidden', false);
-                    } else {
-                        const label = attrs.label.toLowerCase();
-                        graph.setNodeAttribute(node, 'hidden', !label.includes(query));
-                    }
-                });
+            if (activeNode && !data.highlighted) {
+                res.color = COLORS.nodeDim;
+                res.size = data.size * 0.7;
+            }
 
-                renderer.refresh();
-            });
+            if (data.hidden) {
+                res.hidden = true;
+            }
 
-            // Visual reducer for hover/selection effect
-            renderer.setSetting('nodeReducer', (node, data) => {
-                const res = { ...data };
-                const activeNode = hoveredNode || selectedNode;
+            return res;
+        });
 
-                if (activeNode && !data.highlighted) {
-                    res.color = COLORS.nodeDim;
-                    res.size = data.size * 0.7;
-                }
+        console.log('✓ Interactions ready');
+    }
 
-                if (data.hidden) {
-                    res.hidden = true;
-                }
-
-                return res;
-            });
-
-            console.log('✓ Interactions ready');
-        }
-
-        // Start when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    </script>
-</body>
+    // Start when page loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+</script></body>
 
 </html>
